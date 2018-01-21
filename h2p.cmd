@@ -1,4 +1,18 @@
-:: By JaCk | Release 12/2/2017 | h2p.cmd  --- uses wkhtmltopdf.exe to download and create local pdfs
+::  By JaCk  |  Release 12/2/2017  |  https://github.com/1ijack/BatchMajeek/blob/master/h2p.cmd  |  h2p.cmd  --- uses wkhtmltopdf.exe to download and create local pdfs
+:::
+::: The zlib/libpng License -- https://opensource.org/licenses/Zlib
+::  Copyright (c) 2018 JaCk
+::  
+::  This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
+::  
+::  Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+::  
+::  1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+::  
+::  2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+::  
+::  3. This notice may not be removed or altered from any source distribution.
+:::
 @echo off &if "%~1" equ "--Gogogougo-Gougogo--" ( goto :func_h2p_aprocess_varset ) else setlocal EnableExtensions
 goto :func_barg_parg
 
@@ -24,8 +38,7 @@ goto :eof
 
 ::: Bunctions
 goto :eof rem   -- When you think you've seen it all... Fatch out for Bunctions. [x] EzCheese
-          rem   -- Bunc'in Fatches Since DOS.  Where you werent set/pack= with a prompt all the time, you had choice
-          rem   -- Bunc'in Fatches Since DOS. [x] Yeah-I-Went-There
+          rem   -- Bunc'in Fatches Since DOS.  Where you werent set/pack= with a prompt all the time, you had choice  [x] Yeah-I-Went-There
 
 ::  Usage  ::  func_h2p_ahelp_me
 rem  Dumps loads and loads of halpsmes.
@@ -258,7 +271,7 @@ rem     New limitation: cannot use "k=v" OR "?" in the first loop.... The latter
     if /i "%~1%~2%~3" equ "-?"  call :func_h2p_ahelp_me
     if /i "%~1%~2%~3" equ "/?"  call :func_h2p_ahelp_me
     if /i "%~1%~2%~3" equ "--?" call :func_h2p_ahelp_me
-    
+
     for %%Z in (
         %*
     ) do for /f "tokens=* delims=+-/" %%X in (
@@ -348,12 +361,12 @@ rem     New limitation: cannot use "k=v" OR "?" in the first loop.... The latter
         ) else if /i "-%%~U" equ "-b" (
                                             if "-%%~V" equ "-" (
                                                 echo/-b:"expecting path\BinName"
-                                            ) else set "_h2p_binary%%~V"
+                                            ) else set "_h2p_binary=%%~V"
 
         ) else if /i "-%%~U" equ "-binary" ( 
                                             if "-%%~V" equ "-" (
                                                 echo/--binary:"expecting path\BinName"
-                                            ) else set "_h2p_binary%%~V"
+                                            ) else set "_h2p_binary=%%~V"
 
         ) else if /i "-%%~U" equ "-norun" (
                                             set "_h2p_norun=true"
@@ -362,9 +375,9 @@ rem     New limitation: cannot use "k=v" OR "?" in the first loop.... The latter
             if "-%%~V" equ "-" (
                set "debug_h2p_msgs=true" 
             ) else for %%b in (
-                %%~V
+                %%V
             ) do for /f "tokens=1-3 delims=:-" %%g in (
-                -%%b
+                "-%%~b"
             ) do call :func_h2p_pargs_debug %%g %%h %%i
 
         ) else if /i  "%%~X" neq "" (
@@ -386,34 +399,33 @@ rem     New limitation: cannot use "k=v" OR "?" in the first loop.... The latter
         
     )
 
-::: End of Args Parse
+    rem  End of Args Parse   -  Dump DebugSummary when needed
 
-if defined debug_h2p_msgs (
-    call :func_h2p_dump_debug_msg  "Post ArgsPharse Vars Summary"     " %~nx0"         "%debug_h2p_terse_msgs%" 
-    call :func_h2p_dump_debug_msg  "Vars Defined h2p_url: "         "%h2p_url%"        "%debug_h2p_terse_msgs%" 
-    call :func_h2p_dump_debug_msg  "Vars Defined h2p_output: "      "%h2p_output%"     "%debug_h2p_terse_msgs%" 
-    call :func_h2p_dump_debug_msg  "Vars Defined _h2p_binary "     "%_h2p_binary%"     "%debug_h2p_terse_msgs%" 
-    echo/&echo/&echo/ Dumping Script Vars:
-    echo/----------------------------------------
-    call :func_h2p_dump_debug_msg  "" "%~0"
-    echo/----------------------------------------
-    echo/
-)
+    if defined debug_h2p_msgs (
+        call :func_h2p_dump_debug_msg  "Post ArgsPharse Vars Summary"     " %~nx0"         "%debug_h2p_terse_msgs%" 
+        call :func_h2p_dump_debug_msg  "Vars Defined h2p_url: "         "%h2p_url%"        "%debug_h2p_terse_msgs%" 
+        call :func_h2p_dump_debug_msg  "Vars Defined h2p_output: "      "%h2p_output%"     "%debug_h2p_terse_msgs%" 
+        call :func_h2p_dump_debug_msg  "Vars Defined _h2p_binary "     "%_h2p_binary%"     "%debug_h2p_terse_msgs%" 
+        echo/&echo/&echo/ Dumping Script Vars:
+        echo/----------------------------------------
+        call :func_h2p_dump_debug_msg  "" "%~0"
+        echo/----------------------------------------
+        echo/
+    )
 
 
-::: Runs script -- if not done so by the Farg Barser
-REM if not defined _h2p_runcnt 
-:::::: only when defined counters
-:::::: Need to make counter when url is def, then compare with total runs; only run when values dont match
-if defined _h2p_runAcnt ( 
-    if defined _h2p_runTcnt (
-        if "%_h2p_runAcnt%" neq "%_h2p_runTcnt%" call :func_h2p_aprocess_varset
+    rem  Runs script -- Only when unresolved run-counters exist.
+    rem    only when defined counters
+    rem    Need to make counter when url is def, then compare with total runs; only run when values dont match
+    if defined _h2p_runAcnt ( 
+        if defined _h2p_runTcnt (
+            if "%_h2p_runAcnt%" neq "%_h2p_runTcnt%" call :func_h2p_aprocess_varset
+        ) else call :func_h2p_aprocess_varset
     ) else call :func_h2p_aprocess_varset
-) else call :func_h2p_aprocess_varset
 
-::: End of script
-call :func_h2p_a_whole_new_world
-endlocal
+    rem  End of script
+    call :func_h2p_a_whole_new_world
+    endlocal
 goto :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -524,8 +536,8 @@ rem    Note: When "norun" is passed in as param1, leaves bunction before command
     for %%V in ( _h2p_binary ; h2p_output ; h2p_url ) do if not defined %%~V goto :eof
     if /i "%~1" equ "norun" set "_h2p_norun=true" 
     
-    echo/ Info: Command: "%_h2p_binary%" %_h2p_bin_opts% "%h2p_url%" "%h2p_output%"
     if defined _h2p_norun (
+        echo/ Info: NoRun: FinalCmd: "%_h2p_binary%" %_h2p_bin_opts% "%h2p_url%" "%h2p_output%"
         echo/ Info: NoRun: %_h2p_norun%.  leaving runner bunction
         goto :eof
     )
@@ -752,23 +764,23 @@ goto :eof
         rem  scrub-de-dub-do-dat~dampt. *looks around*
         rem    starts sing'n:  "scrub-de-dub-do-dat~damt-dum-ding-clang-clash, popt-dupt-phromt-dead-deddeddeddendt. done-pun-bang-poptposhphrosh"
         set "h2p_go_sA_=%h2p_go_sA_:?= %"
-        set "h2p_go_sA_=%h2p_go_sA_:__=_%"
+        set "h2p_go_sA_=%h2p_go_sA_:.www.=.%"
         set "h2p_go_sA_=%h2p_go_sA_:..=.%"
+        set "h2p_go_sA_=%h2p_go_sA_:__=_%"
         set "h2p_go_sA_=%h2p_go_sA_:--=-%"
+        set "h2p_go_sA_=%h2p_go_sA_:    = %"
+        set "h2p_go_sA_=%h2p_go_sA_:  = %"
         set "h2p_go_sA_=%h2p_go_sA_:_ =_%"
         set "h2p_go_sA_=%h2p_go_sA_:- =-%"
         set "h2p_go_sA_=%h2p_go_sA_:. =.%"
+        set "h2p_go_sA_=%h2p_go_sA_:  = %"
         set "h2p_go_sA_=%h2p_go_sA_: _=_%"
         set "h2p_go_sA_=%h2p_go_sA_: -=-%"
         set "h2p_go_sA_=%h2p_go_sA_: .=.%"
-        set "h2p_go_sA_=%h2p_go_sA_:    = %"
-        set "h2p_go_sA_=%h2p_go_sA_:  = %"
-        set "h2p_go_sA_=%h2p_go_sA_:.www.=.%"
         
         rem  wash string in the front, then the back
-        for %%E in ( "-";" ";" ";"_";".";"+") do ( if "%h2p_go_sA_:~0,1%" equ "%%~E" set "h2p_go_sA_=%h2p_go_sA_:~1%"
-                                                   if "%h2p_go_sA_:~-1,1%" equ "%%~E" set "h2p_go_sA_=%h2p_go_sA_:~0,-1%"
-        )
+        for %%E in ( "-";" ";" ";"_";".";"+") do if "%h2p_go_sA_:~0,1%" equ "%%~E" call set "h2p_go_sA_=%h2p_go_sA_:~1%"
+        for %%E in ( "-";" ";" ";"_";".";"+") do if "%h2p_go_sA_:~-1,1%" equ "%%~E" call set "h2p_go_sA_=%h2p_go_sA_:~0,-1%"
         
         rem  rinse, toss var back on and done
         set "%~1=%h2p_go_sA_%"
@@ -822,6 +834,18 @@ rem    Returns:        myList="Kelly and Megan" ; "Sam and Stan" ; Joe ; Sarah ;
     if not defined %~1 set "%~1=%2"
 goto :eof
 
+
+
+::  Usage  ::  func_h2p_time_calc_today_ms  ReturnVar
+rem calc ms in today -- no support for supplied time
+:func_h2p_calc_time_ms
+    if "%~1" equ "" goto :eof
+    set /a "%~1=( 1%time:~-2% - 100 ) + (( 1%time:~-5,2% - 100 ) * 1000) + (( 1%time:~3,2% - 100 ) * 60000 ) + (( %time:~0,2% + 2 - 2) * 3600000)"
+    set "%~1+=0"
+goto :eof
+    
+    
+
 :: Usage :: func_h2p_dump_debug_msg  MsgTextORHeaderText-Optional   MsgText-Optional   doNotDumpVarsFlag-Optional
 rem Prints messages from params 1 and 2 and dumps all script vars if param 3 is undef
 rem   Examples  ---  To dump all vars and not print other messages       ---  func     ""            ""  
@@ -831,24 +855,26 @@ rem   Note:  Originally this was split into 3 bunctions to better display/unders
     if not defined debug_h2p_msgs goto :eof
     if "%~1" equ "" if "%~3" neq "" goto :eof
     
-    set "h2p__ddbgln_A="
+    set "_h2p__ddbgln_A="
     
     if "%~1" neq "" if defined debug_h2p_grab_lnum for /f "eol=- tokens=1 delims=[]" %%A in (
         'find /N "%~1" "%~dpnx0"'
-    ) do if "/%%~A" neq "/" call :func_h2p_concatList  h2p__ddbgln_A  %%A
+    ) do if "/%%~A" neq "/" call :func_h2p_concatList  _h2p__ddbgln_A  %%A
     
-    if defined h2p__ddbgln_A set "h2p__ddbgln_A=Line: [ %h2p__ddbgln_A% ]:"
-    set /a "h2p__ddbgsnd_A=(%time:~-2% + 2 - 2) + ((%time:~-5,2% + 2 - 2) * 1000) + ((%time:~3,2% + 2 - 2 ) * 60000 ) + (( %time:~0,2% + 2 - 2) * 3600000)"
+    if defined _h2p__ddbgln_A set "_h2p__ddbgln_A=Line: [ %_h2p__ddbgln_A% ]:"
+    call :func_h2p_calc_time_ms  "_h2p__ddbgsnd_A"
+    if defined _h2p__ddbgsnd_A set "_h2p__ddbgsnd_A=.%_h2p__ddbgsnd_A%"
     
-    
-    if "/%~1" neq "/" echo/    Debug: %date:~-2%%date:~4,2%%date:~7,2%.%h2p__ddbgsnd_A%: %h2p__ddbgln_A% "%~1%~2"
+    if "/%~1" neq "/" echo/    Debug: %date:~-2%%date:~4,2%%date:~7,2%%_h2p__ddbgsnd_A%: %_h2p__ddbgln_A% "%~1%~2"
     if "/%~3" neq "/" goto :eof
     
-    for /f "tokens=1,* delims==" %%V in ('set h2p_') do if "%%~V" neq "" echo/    Debug: %date:~-4,4%%date:~4,2%%date:~7,2%.%h2p__ddbgsnd_A%: %h2p__ddbgln_A% Variable: "%%~V": "%%~W"  
+    for /f "tokens=1,* delims==" %%V in ('set h2p_') do if "%%~V" neq "" echo/    Debug: %date:~-2%%date:~4,2%%date:~7,2%%_h2p__ddbgsnd_A%: %_h2p__ddbgln_A% Variable: "%%~V": "%%~W"  
     echo/
-    set "h2p__ddbgsnd_A="
-    set "h2p__ddbgln_A="
+    set "_h2p__ddbgsnd_A="
+    set "_h2p__ddbgln_A="
 goto :eof
+    rem  calc ms with octal issue
+    REM set /a "_h2p__ddbgsnd_A=(%time:~-2% + 2 - 2) + ((%time:~-5,2% + 2 - 2) * 1000) + ((%time:~3,2% + 2 - 2 ) * 60000 ) + (( %time:~0,2% + 2 - 2) * 3600000)"
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -1020,7 +1046,7 @@ rem   -debug:(g,h,i) -- -debug:(%~1,%~2,%~3)
                                            @echo on
         ) else if /i "%~2" equ "trace"  @( echo on
         )
-        goto :eof
+        @goto :eof
     )
     
     rem quick quickies [-debug:bool(off):feature]
@@ -1043,7 +1069,7 @@ rem   -debug:(g,h,i) -- -debug:(%~1,%~2,%~3)
                                            @echo off
         ) else if /i "%~2" equ "trace"  @( echo off 
         )
-        goto :eof
+        @goto :eof
     )
 
     rem quick quickies [-debug:[outString]:featureOrBool:Bool]
@@ -1081,7 +1107,7 @@ rem   -debug:(g,h,i) -- -debug:(%~1,%~2,%~3)
             for %%u in (%debug_states_true%) do if /i "%~3" equ "%%~u" set "debug_h2p_grab_lnum=true"
             for %%u in (%debug_states_false%) do if /i "%~3" equ "%%~u" set "debug_h2p_grab_lnum="
         )
-        goto :eof
+        @goto :eof
     )
 
     rem --debug:lines:undef(toogle(on,off))
@@ -1109,20 +1135,20 @@ rem   -debug:(g,h,i) -- -debug:(%~1,%~2,%~3)
                 echo on
             )
         )
-        goto :eof
+        @goto :eof
     ) else (
         @for %%u in (%debug_states_true%) do @if /i "%~2" equ "%%~u" @echo on
         @for %%u in (%debug_states_false%) do @if /i "%~2" equ "%%~u" @echo off
-        goto :eof
+        @goto :eof
     )
 
     rem --debug:verbose:undef(toogle(on,off))
     rem --debug:verbose:bool(on,off)
     if /i "-%~1" equ "-verbose" if "%~2" equ "" (
-        if defined debug_h2p_grab_lnum ( echo/--debug:%~1:[on/off] Setting toggle: off
-            set "debug_h2p_terse_msgs=true"
+        if defined debug_h2p_terse_msgs ( echo/--debug:%~1:[on/off] Setting toggle: off
+            set "debug_h2p_terse_msgs="
         ) else                         ( echo/--debug:%~1:[on/off] Setting toggle: on
-            set "debug_h2p_grab_lnum="
+            set "debug_h2p_grab_lnum=true"
         )
         goto :eof
     ) else (
