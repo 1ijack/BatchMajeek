@@ -1,4 +1,4 @@
-::  By JaCk  |  Release 12/2/2017  |  https://github.com/1ijack/BatchMajeek/blob/master/h2p.cmd  |  h2p.cmd  --- uses wkhtmltopdf.exe to download and create local pdfs
+::  By JaCk  |  Release 01/21/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/h2p.cmd  |  h2p.cmd  --- uses wkhtmltopdf.exe to download and create local pdfs
 :::
 ::: The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
