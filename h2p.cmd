@@ -114,7 +114,8 @@ rem  Like, everywhere
     echo/       --output:file, -o:file   Output to a local file. When filename is "auto", script generates a filename.
     echo/      -o:"dir path\fname.pdf"     OK: absolute/relative paths
     echo/               file.pdf, auto     No definition required when passed as the 2nd argument
-    echo/                --output:auto     Do not use with --auto; see --auto
+    echo/               --output:path\     When only path is provided, guesses filename with when "--auto" is enabled
+    echo/                      -o:auto     
     echo/                               
 goto :eof
 
@@ -489,11 +490,19 @@ rem    Errlvl 456  =  Function took a crap
     if not defined _h2p_binary      call :func_h2p_where_bin       "_h2p_binary"    "wkhtmltopdf.exe"       true 
     if not exist "%_h2p_binary%"    call :func_h2p_where_bin       "_h2p_binary"    "wkhtmltopdf.exe"       true 
 
+    rem  prefix affix
+    for %%A in ("%h2p_output%") do set "h2p_atrb_o=%%~aA"
+    if "%h2p_atrb_o:~0,1%"  equ "d" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
+    if "%h2p_output:~-1,1%" equ "\" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
+    if "%h2p_output:~-1,1%" equ "/" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
+    set "h2p_atrb_o="
+
     rem  resolve output filename when unset; auto var check
     if not defined h2p_output if defined _h2p_auto_output (
            call :func_h2p_guess_auto       h2p_output
     ) else call :func_h2p_guess_n_ask     "h2p_output"    "%h2p_url%"
 
+    
     rem  resolve output filename when unset; auto name check
     rem    'auto' session when you want 'auto' to be permenant in the ; otherwise leave commented below (after ~100 chars), "set _h2p_auto_output" command  
     for %%A in ( a auto ) do if /i "-%%~A" equ "-%h2p_output%" call :func_h2p_guess_auto h2p_output
@@ -515,6 +524,33 @@ rem    Errlvl 456  =  Function took a crap
 goto :eof
 
 
+
+::  Usage  ::  func_h2p_outdir_prefix_auto   "returnVar"   "prefix\Path\And\Or\Name"
+rem  Auto generates filename and prepends string before it.  Does this only once (unless var h2p_preVar is cleared)
+:func_h2p_outdir_prefix_auto
+    if defined h2p_preVar goto :eof
+    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "affix preffix "     " %~0 - %~1 %~2"           "%debug_h2p_terse_msgs%" 
+
+    if "%~1" equ "" goto :eof
+    if "%~2" equ "" if not defined %~1 (
+        goto :eof
+    ) else for /f "tokens=1,* delims=" %%A in ('set %1') do (
+        call %~0 "%%~B"
+        goto :eof
+    )
+    
+    set "h2p_preVar=%~2"
+    set "%~1="
+    
+    call :func_h2p_guess_auto  %1
+    if not defined %~1 (
+        set "%~1=%h2p_preVar%"
+        goto :eof
+    )
+    
+    for /f "tokens=1,* delims==" %%A in ('set %~1') do set "%%~A=%h2p_preVar%%%~B"
+    
+goto :eof
 
 ::  Usage  ::  func_h2p_gen_pdf  boolSwitch(optional("norun"))
 rem  "Runs" "Bin" with optional params
@@ -544,6 +580,7 @@ rem    Note: When "norun" is passed in as param1, leaves bunction before command
 
     "%_h2p_binary%" %_h2p_add_opts% %_h2p_bin_opts% "%h2p_url%" "%h2p_output%"
     if "1%errorlevel%" neq "10" echo/ Warning: dirty errlevel from binary "%_h2p_binary%"
+    if exist "%h2p_output%" echo Info: File saved: "%h2p_output%"
     
 goto :eof
 
@@ -708,16 +745,6 @@ rem    3 - Generates and name with a timestamp, then prompts user if they want t
 
 goto :eof
 
-
-
-    REM for /f "tokens=1-26 delims==/?!&,;@\" %%A in (
-        REM "%~2"
-    REM ) do   if "%%~Z" neq "" ( set h2p_clncntr=26
-    REM ) else if "%%~T" neq "" ( set h2p_clncntr=20
-    REM ) else if "%%~O" neq "" ( set h2p_clncntr=15
-    REM ) else if "%%~J" neq "" ( set h2p_clncntr=10
-    REM ) else if "%%~E" neq "" ( set h2p_clncntr=5
-    REM ) else set "h2p_clncntr=20"
 
 ::  Usage  :: func_h2p_guess_outname  returnVar  "url"
 rem  Creates a recommendation for an output file name
