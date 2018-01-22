@@ -11,6 +11,8 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - Code still needs to be scrubbed as some bunctions are not needed.
   - This script was my arg parser stress-test and where I ironed out a bunch of issues with the arg parser.  Hence, why I'm sharing.
     - Please note, "%" and "?" are problematic in DosBatchlaundio
+- [hhmmss.cmd](../master/hhmmss.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - "Complete Edition"
+- [hhmmss.min.cmd](../master/hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
 - [elevate/elevate.cmd](../master/elevate/elevate.cmd ) -- self-elevate using "bunction" labels
 - [elevate/elvn.cmd](../master/elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
 - [elevate/elvc.cmd](../master/elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
