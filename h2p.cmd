@@ -114,7 +114,7 @@ rem  Like, everywhere
     echo/       --output:file, -o:file   Output to a local file. When filename is "auto", script generates a filename.
     echo/      -o:"dir path\fname.pdf"     OK: absolute/relative paths
     echo/               file.pdf, auto     No definition required when passed as the 2nd argument
-    echo/               --output:path\     When only path is provided, guesses filename with when "--auto" is enabled
+    echo/               --output:path\     When only path is provided, guesses filename when "--auto" is also enabled
     echo/                      -o:auto     
     echo/                               
 goto :eof
@@ -490,13 +490,6 @@ rem    Errlvl 456  =  Function took a crap
     if not defined _h2p_binary      call :func_h2p_where_bin       "_h2p_binary"    "wkhtmltopdf.exe"       true 
     if not exist "%_h2p_binary%"    call :func_h2p_where_bin       "_h2p_binary"    "wkhtmltopdf.exe"       true 
 
-    rem  prefix affix
-    for %%A in ("%h2p_output%") do set "h2p_atrb_o=%%~aA"
-    if "%h2p_atrb_o:~0,1%"  equ "d" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
-    if "%h2p_output:~-1,1%" equ "\" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
-    if "%h2p_output:~-1,1%" equ "/" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
-    set "h2p_atrb_o="
-
     rem  resolve output filename when unset; auto var check
     if not defined h2p_output if defined _h2p_auto_output (
            call :func_h2p_guess_auto       h2p_output
@@ -506,6 +499,10 @@ rem    Errlvl 456  =  Function took a crap
     rem  resolve output filename when unset; auto name check
     rem    'auto' session when you want 'auto' to be permenant in the ; otherwise leave commented below (after ~100 chars), "set _h2p_auto_output" command  
     for %%A in ( a auto ) do if /i "-%%~A" equ "-%h2p_output%" call :func_h2p_guess_auto h2p_output
+
+    rem  prefix affix
+    if "%h2p_output:~-1,1%" equ "\" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
+    if "%h2p_output:~-1,1%" equ "/" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
     
     rem  AUTO resolve output filename when still unset; "this should never happen..." said NoOne, ever
     if not defined h2p_output     call :func_h2p_guess_auto       h2p_output
