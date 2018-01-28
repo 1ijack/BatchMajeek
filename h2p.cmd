@@ -487,8 +487,8 @@ rem    Errlvl 456  =  Function took a crap
     rem  resolve when unset
     REM call :func_h2p_fix_url
     if not defined h2p_url          call :func_h2p_get_user_input  "h2p_url"       "&echo/  Input: User: Enter url or html location"   ""
-    if not defined _h2p_binary      call :func_h2p_where_bin       "_h2p_binary"    "wkhtmltopdf.exe"       true 
-    if not exist "%_h2p_binary%"    call :func_h2p_where_bin       "_h2p_binary"    "wkhtmltopdf.exe"       true 
+    if not defined _h2p_binary      call :func_h2p_whereForFile       "_h2p_binary"    "wkhtmltopdf.exe"       true 
+    if not exist "%_h2p_binary%"    call :func_h2p_whereForFile       "_h2p_binary"    "wkhtmltopdf.exe"       true 
 
     rem  resolve output filename when unset; auto var check
     if not defined h2p_output if defined _h2p_auto_output (
@@ -687,7 +687,7 @@ goto :eof
 rem  Generate descriptive output names. Respective of 
 rem    1 - Generates a name based on the url.timestamp
 rem    2 - Generates a name based on the tld.timestamp
-rem    3 - Generates and name with a timestamp
+rem    3 - Generates a name with a timestamp
 :func_h2p_guess_auto
     if "%~1" equ "" exit /b 456
     if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "auto filename suggestion"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
@@ -705,8 +705,10 @@ rem    3 - Generates and name with a timestamp
     
     rem url -- leave early
     call :func_h2p_guess_outname   "%~1"  "%~2"
-    if "1%errorlevel%" equ "10" for /f "tokens=1,* delims==" %%A in ('set "%~1"') do set "%~1=%%~B.%h2p_YyyyMmDdSecs%.pdf"
-    if defined %~1 goto :eof
+    if defined %~1 (
+        for /f "tokens=1,* delims==" %%A in ('set "%~1"') do set "%~1=%%~B.%h2p_YyyyMmDdSecs%.pdf"
+        goto :eof
+    )
     
     rem tld
     for /f "tokens=2 delims==/?!&,;@#" %%B in ("%~2") do set "%~1=%%~B.%h2p_YyyyMmDdSecs%.pdf"
@@ -718,26 +720,20 @@ goto :eof
 
 ::  Usage  :: func_h2p_guess_n_ask   returnVar   "url"
 rem  Generates three names, then prompts user (once) if they want to change it
-rem    1 - Generates a name based on the url.timestamp, then prompts user if they want to change it
-rem    2 - Generates a name based on the tld.timestamp, then prompts user if they want to change it
-rem    3 - Generates and name with a timestamp, then prompts user if they want to change it
+rem    1 - Generates a file name based on the url.timestamp, then prompts user if they want to change it
+rem    2 - Generates a file name based on the tld.timestamp, then prompts user if they want to change it
+rem    3 - Generates a file name with a timestamp, then prompts user if they want to change it
 :func_h2p_guess_n_ask
-    if "%~1" equ "" exit /b 456
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "prompt user after filename suggestion"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
+    if "%~1" equ "" ( exit /b 456 ) else if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "prompt user after filename suggestion"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
+
     call :func_h2p_get_time_string h2p_YyyyMmDdSecs
-    set "%~1="
 
     call :func_h2p_guess_outname   "%~1"  "%~2"
-    if "1%errorlevel%" equ "10" for /f "tokens=1,* delims==" %%A in ('set "%~1"') do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
-    if "1%errorlevel%" equ "10" set "h2p_YyyyMmDdSecs=" &goto :eof
 
+    if defined %~1 for /f "tokens=1,* delims==" %%A in ('set "%~1"') do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
+    if not defined %~1 for /f "tokens=2 delims==/?!&,;@#" %%B in ("%~2") do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
+    if not defined %~1 call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%h2p_YyyyMmDdSecs%" 
 
-    for /f "tokens=2 delims==/?!&,;@#" %%B in ("%~2") do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
-    if "1%errorlevel%" equ "10" set "h2p_YyyyMmDdSecs=" &goto :eof
-    
-    call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%h2p_YyyyMmDdSecs%" 
-    if "1%errorlevel%" equ "10" set "h2p_YyyyMmDdSecs=" &goto :eof
-    
     set "h2p_YyyyMmDdSecs="
 
 goto :eof
@@ -749,27 +745,25 @@ rem  Creates a recommendation for an output file name
     if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "using url for filename suggestion"     " %~0 - %~1 : %~2 "           "%debug_h2p_terse_msgs%" 
     if "%~2" equ "" exit /b 456
     if "%~1" equ "" exit /b 456
+    
+    set "h2p_clncntr="
     set "%~1="
-    set "h2p_clncntr=20"
     
-    rem  Guesstimate ammount of crap to clean up
-    set "h2p_clncntr=2"
-    for /f "tokens=1-26 delims==/?!&,;@\" %%A in (
-        "%~2"
-    ) do set /a "h2p_clncntr+=1"
-    
-    for /f "tokens=1-26 delims==/?!&,;@\" %%A in (
-        "%~2"
-    ) do if "%%~A" neq "" if "%%~A" equ "file:"  ( 
-           set "%~1=%~nx2.file"
-           set "h2p_clncntr=5"
-    ) else set "%~1=%%~C %%~D %%~E %%~F %%~G %%~H %%~I %%~J %%~K %%~L %%~M %%~N %%~O %%~P %%~Q %%~R %%~S %%~T %%~U %%~V %%~W %%~X %%~Y %%~Z.%%~B"
-    if not defined %~1 exit /b 1
+    rem  Guesstimate ammount of crap to clean up; ( 2(A+B) + Num-Url-Parts )
+    for /f "tokens=1-26 delims==/?!&,;@\" %%A in ( "%~2"
+    ) do if "%%~A" neq "" (
+        set "%~1=%~nx2.%computername%"
+        if "%%~A" neq "file:" set "%~1=%%~C %%~D %%~E %%~F %%~G %%~H %%~I %%~J %%~K %%~L %%~M %%~N %%~O %%~P %%~Q %%~R %%~S %%~T %%~U %%~V %%~W %%~X %%~Y %%~Z.%%~B"
 
-    rem  20x times - removing unwanted/duplicate symbols
-    for /l %%A in (1,1,%h2p_clncntr%) do call :sub_chqNstrp__h2p_guess_outname "%~1"  "%%~A"
+        for %%g in ( %%A %%B %%C %%D %%E %%F %%G %%H %%I %%J %%K %%L %%M %%N %%O %%P %%Q %%R %%S %%T %%U %%V %%W %%X %%Y %%Z 
+        ) do if "%%~g" neq "" set /a "h2p_clncntr+=1"
+    )
     
-    for /f "tokens=1,* delims==" %%U in ('set "%~1"') do set "%~1=%%~V"
+    if not defined %~1 exit /b 1
+    if not defined h2p_clncntr set "h2p_clncntr=20"
+    
+    for /l %%A in (1,1,%h2p_clncntr%) do call :sub_chqNstrp__h2p_guess_outname "%~1"  "%%~A"
+
     exit /b 0
     
 goto :eof
@@ -811,6 +805,30 @@ goto :eof
         set "h2p_go_sA_="
     
     goto :eof
+
+
+::  Usage  ::  func_h2p_whereForFile  returnVar   "FileOrBinaryName" 
+rem  returns param1 set to found path. Uses pure batch method to locate the binary in param2
+:func_h2p_whereForFile
+    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Looking for bins with purebatch"     " %~0 - %~1 - %~2 "           "%debug_h2p_terse_msgs%" 
+    if "%~2" equ "" exit /b 456
+    if "%~1" equ "" exit /b 456
+    set "%~1="
+    
+    if "%~2" neq "" set "h2p_8O08=%~dp2;%cd%;%PATH%"
+    rem  Search PATH/CD using the extensionlist ( and fileExt when provided ) for the desired file
+    for %%P in (
+        "%~2"
+    ) do for %%e in (
+        %~x2 ; %PATHEXT%
+    ) do for %%i in (
+        "%%~nP%%e" 
+    ) do if not "%%~$h2p_8O08:i" equ "" set "%~1=%%~$h2p_8O08:i"
+    
+    set "h2p_8O08="
+    if not defined %~1 exit /b 1
+
+goto :eof
 
     
 ::  Usage  ::  func_h2p_where_bin  returnVar   "path\BinaryName.ext"   "onlyOne-trueBool-optional"
