@@ -1,4 +1,4 @@
-::  By JaCk  |  Release 01/21/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/h2p.cmd  |  h2p.cmd  --- uses wkhtmltopdf.exe to download and create local pdfs
+::  By JaCk  |  Release 01/30/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/h2p.cmd  |  h2p.cmd  --- uses wkhtmltopdf.exe to download and create local pdfs
 :::
 ::: The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -13,8 +13,7 @@
 ::  
 ::  3. This notice may not be removed or altered from any source distribution.
 :::
-@echo off &if "%~1" equ "--Gogogougo-Gougogo--" ( goto :func_h2p_aprocess_varset ) else setlocal EnableExtensions
-goto :func_barg_parg
+@echo off & setlocal EnableExtensions & goto :func_h2p_mein
 
 :::  User Hardcoded Settings
 :conf_user_settings
@@ -36,9 +35,15 @@ goto :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 ::: Bunctions
 goto :eof rem   -- When you think you've seen it all... Fatch out for Bunctions. [x] EzCheese
           rem   -- Bunc'in Fatches Since DOS.  Where you werent set/pack= with a prompt all the time, you had choice  [x] Yeah-I-Went-There
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::  Usage  ::  func_h2p_ahelp_me
 rem  Dumps loads and loads of halpsmes.
@@ -245,188 +250,291 @@ goto :eof
 
 
 
-::: Args parse
-::  "Barg Parg" or "Farg Barser" -- by Alex Vronskiy
-::    Release 10/19/2017 -- You may use this and distribute it freely
-rem   Variable to loop mapping
-rem   Note: Crappy explanation of for/forf loop's values:
-rem        --["variable_X"]   is a raw form of   --["variable_U:variable_V"]   or    --["variable_U"]
-rem        --[variable_U]:[variable_V]  or  --[variable_U]=[variable_V]  or just --[variable_U]
-rem   
-rem   Reminder: loose arg-prefix acceptance (stripped arg-prefix: X, UV): 
-rem     These are accepted switches/key-value pairs, each line is evaulated the same
-rem       s,   -s,   +s,   --s,   /-s,   /s
-rem       k:v, -k:v, +k:v, --k:v, /-k:v, /k:v
-rem     
-rem     You would think this works, but it doesn't: (the key cannot be separated from the value).  
-rem       k v, -k v, --k v, /-k v, /k v    -- it is highly probable that the vars may get "caught" correctly as this script uses ordered vars
-rem     
-rem     New limitation: cannot use "k=v" OR "?" in the first loop.... The latter is a HUGE problem as most links contain one.
-:func_barg_parg
+:func_h2p_mein
     call :func_h2p_a_whole_new_world
     call :conf_user_settings
     call :conf_script_settings
 
-    rem  No params, send to help (will only args-parse when there are args to parse)
-    if /i "%~1%~2%~3" equ  ""   call :func_h2p_ahelp_me
-    if /i "%~1%~2%~3" equ "-?"  call :func_h2p_ahelp_me
-    if /i "%~1%~2%~3" equ "/?"  call :func_h2p_ahelp_me
-    if /i "%~1%~2%~3" equ "--?" call :func_h2p_ahelp_me
-
-    for %%Z in (
-        %*
-    ) do for /f "tokens=* delims=+-/" %%X in (
-        "-%%Z"
-    ) do for /f "tokens=1,* delims=:" %%U in (
-        "%%X"
-    ) do (
-        rem arg-prefix (character-chains) are stripped, loose arg-prefix acceptance: k:v, [----]k:v, [////]k:v, 
-        rem I need halps ignoring the arg-prefix to minimize number of checks
-               if /i "-%%~U" equ "-h"    (
-                                            call :func_h2p_pargs_help "%%~V"
-                                            goto :eof
-        ) else if /i "-%%~U" equ "-help" (
-                                            call :func_h2p_pargs_help "%%~V"
-                                            goto :eof
-        ) else if /i "-%%~U" equ "-done" (
-                                            REM  Gogogo, through the Side-door -- relaunch script to run env set
-                                            call "%~f0" "--Gogogougo-Gougogo--"
-                                            call :func_h2p_a_whole_new_world  "h2p_"
-        ) else if /i "-%%~U" equ "-run"  (
-                                            rem  Fast-trak through the GoGoGo-door.  
-                                            call "%~f0" "--Gogogougo-Gougogo--"
-                                            call :func_h2p_a_whole_new_world  "h2p_"
-        ) else if /i "-%%~U" equ "-go"   (
-                                            rem  Gogogo Note: If that hairy GoGoGo remains uncaught, it "Gogogoes" a 1go, a 2go, and a 3go continues to next param
-                                            call "%~f0" "--Gogogougo-Gougogo--"
-                                            call :func_h2p_a_whole_new_world  "h2p_"
-
-        ) else if /i "-%%~Z" equ "---Gogogougo-Gougogo--" (
-                                            rem  Taking the "bullet" out of the chamber making sure that the env is eval'd once
-                                            rem  Just like a locked gun, this block shouldn't trigger, but, weirder things have happened. 
-                                            rem    Weeeeee, we're goofing offffff and getting PAID.  Thats what Im talking aboot
-                                            rem    Heavy Indian Accent: Jus, a-take-it.  And-a GO.
-                                            REM goto :func_h2p_aprocess_varset
-                                            
-        ) else if /i "-%%~U" equ "-u"    (
-                                            if "-%%~V" equ "-" (
-                                                echo/-u:"expecting url"
-                                            ) else set "h2p_url=%%~V"
-                                            
-        ) else if /i "-%%~U" equ "-url" (
-                                            if "-%%~V" equ "-" (
-                                                echo/--url:"expecting url"
-                                            ) else set "h2p_url=%%~V"
-
-        REM ) else if /i "-%%~U" equ "-silent" ( 
-                                                   REM if "-%%~V" equ  "-"    ( set "_h2p_silent=true"  
-                                            REM ) else if "-%%~V" equ "-on"   ( set "_h2p_silent=true"  
-                                            REM ) else if "-%%~V" equ "-off"    set "_h2p_silent="  
-        
-        ) else if /i "-%%~U" equ "-o" (
-                                            if "-%%~V" equ "-" (
-                                                echo/-o:"expecting path\filename.pdf"
-                                            ) else if "-%%~V" equ "-auto" (
-                                                call :func_h2p_guess_auto h2p_output
-                                            ) else set "h2p_output=%%~V"
-
-        ) else if /i "-%%~U" equ "-output" (
-                                            if "-%%~V" equ "-" (
-                                                echo/-output:"expecting path\filename.pdf"
-                                            ) else if "-%%~V" equ "-auto" (
-                                                call :func_h2p_guess_auto h2p_output
-                                            ) else set "h2p_output=%%~V"
-
-        ) else if /i "-%%~U" equ "-a" ( 
-                                            call :func_h2p_guess_auto h2p_output
-        ) else if /i "-%%~U" equ "-auto" ( 
-                                            call :func_h2p_guess_auto h2p_output
-
-        ) else if /i "-%%~U" equ "-n" (
-                                            if "-%%~V" equ "-" (
-                                                echo/--add-opts:"additional options"
-                                                echo/   Or   -n:"additional options"
-                                            ) else set "_h2p_add_opts=%%~V"
-
-        ) else if /i "-%%~U" equ "-add-opts" (
-                                            if "-%%~V" equ "-" (
-                                                echo/--add-opts:"additional options"
-                                            ) else set "_h2p_add_opts=%%~V"
-
-        ) else if /i "-%%~U" equ "-no" (
-                                            set "_h2p_bin_opts=%%~V"
-
-        ) else if /i "-%%~U" equ "-add-opts-overwrite" (
-                                            set "_h2p_bin_opts=%%~V"
-
-        ) else if /i "-%%~U" equ "-b" (
-                                            if "-%%~V" equ "-" (
-                                                echo/-b:"expecting path\BinName"
-                                            ) else set "_h2p_binary=%%~V"
-
-        ) else if /i "-%%~U" equ "-binary" ( 
-                                            if "-%%~V" equ "-" (
-                                                echo/--binary:"expecting path\BinName"
-                                            ) else set "_h2p_binary=%%~V"
-
-        ) else if /i "-%%~U" equ "-norun" (
-                                            set "_h2p_norun=true"
-                                            
-        ) else if /i "-%%~U" equ "-debug" (
-            if "-%%~V" equ "-" (
-               set "debug_h2p_msgs=true" 
-            ) else for %%b in (
-                %%V
-            ) do for /f "tokens=1-3 delims=:-" %%g in (
-                "-%%~b"
-            ) do call :func_h2p_pargs_debug %%g %%h %%i
-
-        ) else if /i  "%%~X" neq "" (
-                                            rem unless defined, 1st param: url, 2nd param: output file
-                                                   if not defined h2p_url    ( set "h2p_url=%%~X"
-                                            ) else if not defined h2p_output ( set "h2p_output=%%~X"
-                                            )
-
-        ) else if /i  "%%~xU" equ ".pdf" (
-                                            if not defined h2p_output set "h2p_output=%%~U"
-        )
-
-        if defined debug_h2p_msgs (
-            call :func_h2p_dump_debug_msg  "ArgsPharseV parsed value " "%%~V"   "%debug_h2p_terse_msgs%" 
-            call :func_h2p_dump_debug_msg  "ArgsPharseU parsed key "   "%%~U"   "%debug_h2p_terse_msgs%" 
-            call :func_h2p_dump_debug_msg  "ArgsPharseX paircheck "    "%%~X"   "%debug_h2p_terse_msgs%" 
-            call :func_h2p_dump_debug_msg  "ArgsPharseZ raw-param "    "%%~Z"   "%debug_h2p_terse_msgs%" 
-        )
-        
+    rem  W/A for a bug in interpreter 
+    if .%1. equ ./?. (
+        call :func_h2p_pargs_help 
+        goto :eof
     )
-
-    rem  End of Args Parse   -  Dump DebugSummary when needed
-
-    if defined debug_h2p_msgs (
-        call :func_h2p_dump_debug_msg  "Post ArgsPharse Vars Summary"     " %~nx0"         "%debug_h2p_terse_msgs%" 
-        call :func_h2p_dump_debug_msg  "Vars Defined h2p_url: "         "%h2p_url%"        "%debug_h2p_terse_msgs%" 
-        call :func_h2p_dump_debug_msg  "Vars Defined h2p_output: "      "%h2p_output%"     "%debug_h2p_terse_msgs%" 
-        call :func_h2p_dump_debug_msg  "Vars Defined _h2p_binary "     "%_h2p_binary%"     "%debug_h2p_terse_msgs%" 
-        echo/&echo/&echo/ Dumping Script Vars:
-        echo/----------------------------------------
-        call :func_h2p_dump_debug_msg  "" "%~0"
-        echo/----------------------------------------
-        echo/
-    )
-
-
-    rem  Runs script -- Only when unresolved run-counters exist.
+    
+    call :func_h2p_Shifty_Argument %*
+    
+    rem  Runs script -- Only when unresolved run-counters exist -- OR -- When counters are not set 
     rem    only when defined counters
     rem    Need to make counter when url is def, then compare with total runs; only run when values dont match
     if defined _h2p_runAcnt ( 
         if defined _h2p_runTcnt (
             if "%_h2p_runAcnt%" neq "%_h2p_runTcnt%" call :func_h2p_aprocess_varset
-        ) else call :func_h2p_aprocess_varset
+        ) else rem call :func_h2p_aprocess_varset
     ) else call :func_h2p_aprocess_varset
 
     rem  End of script
     call :func_h2p_a_whole_new_world
     endlocal
+goto :eof
+
+
+::: Args parse
+::  "Shifty Argument" -- by Alex Vronskiy -- Release 01/30/2018 -- You may use this and distribute it freely
+rem
+rem  Legend (or usage examples) of accepted/optional prefixes for switches(s) and key-value(k:v) pairs definitions
+rem      s,   -s,   +s,   --s,   /+-s,   /s,    ------------------s
+rem      k:v, -k:v, +k:v, --k:v, /+-k:v, /k:v,  ----------------k:v
+rem      k=v, -k=v, +k=v, --k=v, /+-k=v, /k=v,  ----------------k=v
+rem 
+rem    Optional/Loose Arg-prefix acceptance:
+rem      "Optional" -- meaning does not even need to be prefixed with the accepted prefix but can be an agnostic arg
+rem         "Loose" -- meaning all prefixed instances of the accepted prefixes are stripped no matter the quantity 
+rem     
+rem  shift-loop inf until 10 consecutive empty arguments
+rem     
+rem  ForF loop variable mapping/explanation -- understanding this is not required
+rem      Prefix Parsed Value     :  %%X
+rem      Single Switch Parsing   :  %%U  and/or  %%X
+rem      Key-Value Pair Parsing  :  key:%%U , value:%%V
+rem   
+rem  Key-Value pair limitations: Value CANNOT BE DEFINED via white-space (although this is now resolvable, yet it is beyond the scope of this checkin)
+rem       k v, -k v, --k v, /-k v, /k v    -- Examples of what NOT to do
+rem     
+:func_h2p_Shifty_Argument
+    ( set "_h2p_saOne=%~1"
+    ) 2>nul
+    if not defined _h2p_saOne (
+        rem  Blank Check; upto nine+1 times in a row (nine+1 equ ten times)
+        if defined debug_h2p_msgs if "5%h2p_blank_counter%" lss "59" (
+            call :func_h2p_dump_debug_msg  "empty arg check" " %0 - empty arg count %h2p_blank_counter%"  "%debug_h2p_terse_msgs%"
+        ) else if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "empty arg limit" " [%h2p_blank_counter%] hit leaving %0"  "%debug_h2p_terse_msgs%"
+
+        if "%h2p_blank_counter%" equ "9" goto :eof
+        set /a "h2p_blank_counter+=1"
+        shift /1 
+        goto %~0
+    ) else set "h2p_blank_counter="
+    set "_h2p_saOne="
+
+    rem  W/A for a bug in interpreter 
+    if .%1. equ ./?. (
+        call :func_h2p_pargs_help 
+        shift /1
+        goto %~0
+    )
+
+    rem  strip arg prefix and expose keyPairs/swtiches
+    for /f "usebackq tokens=* delims=+/-" %%X in (
+        `echo/-%1`
+    ) do for /f "usebackq tokens=1,* delims==:;," %%U in (
+        `echo/%%X`
+    ) do if "%%~V" equ "" ( 
+       rem call :func_h2p_match_key_check_value "%%~X" "%~2"
+       rem   above is support for spaced arguments, but there are still some unresolved nuances for live-in-h2p 
+           call :func_h2p_match_key_check_value "%%~U" "%%~V"
+    ) else call :func_h2p_match_key_check_value "%%~U" "%%~V"
+
+    shift /1 
+goto %~0
+
+
+
+:func_h2p_match_key_check_value
+    rem  Help args
+    if /i "-%~1" equ "-?"      call :func_h2p_pargs_help "%~2" & goto :eof
+    if /i "-%~1" equ "-h"      call :func_h2p_pargs_help "%~2" & goto :eof
+    if /i "-%~1" equ "-help"   call :func_h2p_pargs_help "%~2" & goto :eof
+
+
+
+    rem  debug dump
+    if defined debug_h2p_msgs (
+        call :func_h2p_dump_debug_msg  "ArgsPharseU parsed key "   "%~1"   "%debug_h2p_terse_msgs%" 
+        call :func_h2p_dump_debug_msg  "ArgsPharseV parsed value " "%~2"   "%debug_h2p_terse_msgs%" 
+    )
+
+
+
+    rem  debug args
+    if /i "-%~1" equ "-debug" (
+        if "-%~2" equ "-" (
+           set "debug_h2p_msgs=true" 
+        ) else for %%b in (
+            %2
+        ) do for /f "tokens=1-3 delims=:-" %%g in (
+            "-%%~b"
+        ) do call :func_h2p_pargs_debug %%g %%h %%i
+        goto :eof
+    ) 
+
+
+
+    rem  run args
+    rem    Gogogo, through the Side-door -- relaunch script to run env set
+    rem    Gogogo Note: If that hairy GoGoGo remains uncaught, it "Gogogoes" a 1go, a 2go, and a 3go continues to next param
+    rem  run args w/a
+    if /i "-%~1" equ "---Gogogougo-Gougogo--" (
+        rem  Taking the "bullet" out of the chamber making sure that the env is eval'd once
+        rem  Just like a locked gun, this block shouldn't trigger, but, weirder things have happened. 
+        rem    Weeeeee, we're goofing offffff and getting PAID.  Thats what Im talking aboot
+        rem    Heavy Indian Accent: Jus, a-take-it.  And-a GO.
+    goto :eof )
+    
+    
+    if /i "-%~1" equ "-done" (
+        REM call "%~f0" "--Gogogougo-Gougogo--"
+        call :func_h2p_aprocess_varset
+        call :func_h2p_a_whole_new_world  "h2p_"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-run"  (
+        REM call "%~f0" "--Gogogougo-Gougogo--"
+        call :func_h2p_aprocess_varset
+        call :func_h2p_a_whole_new_world  "h2p_"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-go"   (
+        REM call "%~f0" "--Gogogougo-Gougogo--"
+        call :func_h2p_aprocess_varset
+        call :func_h2p_a_whole_new_world  "h2p_"
+        goto :eof
+    ) 
+
+    
+
+    rem  url args
+    if /i "-%~1" equ "-u"    (
+        if "-%~2" equ "-" (
+            echo/-u:"expecting url"
+        ) else set "h2p_url=%~2"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-url" (
+        if "-%~2" equ "-" (
+            echo/--url:"expecting url"
+        ) else set "h2p_url=%~2"
+        goto :eof
+    ) 
+
+
+
+    REM rem  silent output args
+    REM if /i "-%~1" equ "-silent" ( 
+    REM     if "-%~2" equ  "-"    ( set "_h2p_silent=true"  
+    REM     ) else if "-%~2" equ "-on"   ( set "_h2p_silent=true"  
+    REM     ) else if "-%~2" equ "-off"    set "_h2p_silent="  
+    REM goto :eof )
+
+
+
+    rem  output filename args
+    if /i "-%~1" equ "-o" (
+        if "-%~2" equ "-" (
+            echo/-o:"expecting path\filename.pdf"
+        ) else if "-%~2" equ "-auto" (
+            call :func_h2p_guess_auto h2p_output
+        ) else set "h2p_output=%~2"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-output" (
+        if "-%~2" equ "-" (
+            echo/-output:"expecting path\filename.pdf"
+        ) else if "-%~2" equ "-auto" (
+            call :func_h2p_guess_auto h2p_output
+        ) else set "h2p_output=%~2"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-a" ( 
+        call :func_h2p_guess_auto h2p_output
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-auto" ( 
+        call :func_h2p_guess_auto h2p_output
+        goto :eof
+    ) 
+
+    
+    
+    rem  additional binargs args
+    if /i "-%~1" equ "-n" (
+        if "-%~2" equ "-" (
+            echo/--add-opts:"additional options"
+            echo/   Or   -n:"additional options"
+        ) else set "_h2p_add_opts=%~2"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-add-opts" (
+        if "-%~2" equ "-" (
+            echo/--add-opts:"additional options"
+        ) else set "_h2p_add_opts=%~2"
+        goto :eof
+    ) 
+
+    
+    
+    rem  additional binargs-overwrite args
+    if /i "-%~1" equ "-no" (
+        set "_h2p_bin_opts=%~2"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-add-opts-overwrite" (
+        set "_h2p_bin_opts=%~2"
+        goto :eof
+    ) 
+
+    
+    
+    rem  pdfbin args
+    if /i "-%~1" equ "-b" (
+        if "-%~2" equ "-" (
+            echo/-b:"expecting path\BinName"
+        ) else set "_h2p_binary=%~2"
+        goto :eof
+    ) 
+
+    if /i "-%~1" equ "-binary" ( 
+        if "-%~2" equ "-" (
+            echo/--binary:"expecting path\BinName"
+        ) else set "_h2p_binary=%~2"
+        goto :eof
+    ) 
+
+    
+        
+    rem  norun args
+    if /i "-%~1" equ "-norun" (
+        set "_h2p_norun=true"
+        goto :eof
+    ) 
+    
+
+
+    rem  unresolved unnamed args
+    if /i  "%~1" neq "" (
+        rem unless defined, 1st param: url, 2nd param: output file
+        if not defined h2p_url ( 
+            set "h2p_url=%~1"
+        ) else if not defined h2p_output set "h2p_output=%~1"
+        goto :eof
+    ) 
+    
+    rem  .pdf extension args 
+    if /i  "%~x1" equ ".pdf" (
+        if not defined h2p_output set "h2p_output=%~1"
+        goto :eof
+    ) 
+
+    rem  End of Args Parse  
+
+
 goto :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -437,11 +545,13 @@ rem  Resets the h2p world back to square zero (or .5)
 rem    Note: YOU CAN BREAK YOUR SYSTEM!! 
 rem          Please scrub your inputs to get clean outputs. [x] EzCheese
 :func_h2p_a_whole_new_world
-    if "%~1" equ "" for %%K in ( h2p_ ; _h2p_ ; debug_h2p_ ) do call %~0 "%%~K" 2>nul 1>nul 
+    if "%~1" equ "" for %%K in ( h2p_ ; _h2p_ ; debug_h2p_ ) do call %~0 "%%~K"
 
-    if "%~1" neq "" for /f "usebackq tokens=1 delims==" %%V in (
-        `set %1`
-    ) do set "%%~V=" 
+    if "%~1" neq "" (
+        for /f "usebackq tokens=1 delims==" %%V in (
+            `set %1`
+        ) do set "%%~V=" 
+    ) 2>nul
     
 goto :eof
 
@@ -470,7 +580,9 @@ rem    Last,  clear subprocess vars
     rem  reset/unset session run vars
     call :func_h2p_a_whole_new_world  "h2p_" 2>nul 1>nul 
 
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "subprocess varcleared "     " %~0 - Current Setvars "           "Dumpit" 
+    if defined debug_h2p_msgs ( 
+        call :func_h2p_dump_debug_msg  "subprocess varcleared "     " %~0 - Current Setvars "           "Dumpit" 
+    ) 2>nul
 goto :eof
 
 
@@ -692,7 +804,7 @@ rem    3 - Generates a name with a timestamp
     if "%~1" equ "" exit /b 456
     if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "auto filename suggestion"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
     if "%~2" equ "" if defined h2p_url (
-        call %~0   "%~1"   "%h2p_url%"
+        call %~0   %1   "%h2p_url%"
         goto :eof
     )
     
