@@ -1,4 +1,4 @@
-:: By JaCk | Release 10/02/2017 | ah.fu.cmd  --  fu m$, untel and other asssholes
+::  By JaCk  |  Release 02/05/2017  |  https://github.com/1ijack/BatchMajeek/blob/master/ah.fu.cmd  |  ah.fu.cmd  --  f.u. m$, untel, dAMD and other assesholes... yes, assesholes.  To lazy to use taskscheduler/cron/"normal solution"?  Need a "custom" solution for a "custom" problem?  Well, you're in luck: from the backalleys of dwm, reppin the handles of "CMD-d.o.t.-EXE"; raised in the shady parts of the of the DOS console,  "shell-grown-fixer", aka "pro-check-this-proc", aka "no-cycle-runna", the one, the only "ah.fu.cmd" -- keeping all these procs in check.  Wrecking hardcore havoc, "git-shelfd" style by forcing sigterms on these youngprocs.
 @echo off & setlocal DisableDelayedExpansion EnableExtensions & ((for /f "tokens=1 delims==" %%V in ('set afu_') do set "%%~V=" ) 2>nul 1>nul ) & title %~nx0: Killing em softly with this song
 
 ::::  User Settings
@@ -12,7 +12,7 @@ rem  External - live config: dynamic, local file with a process list ---- conf s
  set "afu_list_conf=%userprofile%\eph.u.conf"
 
    ::   Example Config:  
-   ::       $0  would see "mydumb.exe" and "other dump.exe" as processnames, but still see "afu_process_list" as a list label
+   ::       $0  would see "mydumb.exe" and "other dump.exe" as processnames, but still see "kill_list" as a list label, with processnames: igfxEM.exe, "other with spaces.exe" and a.out 
    ::    
    ::    kill_list = igfxEM.exe ; "other with spaces.exe" ; a.out 
    ::    mydumb.exe
