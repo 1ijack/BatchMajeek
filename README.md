@@ -12,11 +12,13 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - This script was my arg parser stress-test and where I ironed out a bunch of issues with the arg parser.  Hence, why I'm sharing.
     - Please note, "%" and "?" are problematic in DosBatchlaundio
 	- Update - 02/01/2018 - Currently args parser is somewhat fragile since the last checkin, the entire parser has been replaced.
+- [raw2res.bat](../master/raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
 - [hhmmss.cmd](../master/hhmmss.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - "Complete Edition"
 - [hhmmss.min.cmd](../master/hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
-- [elevate/elevate.cmd](../master/elevate/elevate.cmd ) -- self-elevate using "bunction" labels
-- [elevate/elvn.cmd](../master/elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
-- [elevate/elvc.cmd](../master/elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
+- [elevate](../master/elevate/) -- self-elevate scripts, functions and examples using "bunction" labels
+  - [elevate/elevate.cmd](../master/elevate/elevate.cmd ) -- self-elevate using "bunction" labels
+  - [elevate/elvn.cmd](../master/elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
+  - [elevate/elvc.cmd](../master/elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
 - [mvlinks.bat](../master/mvlinks.bat ) -- Recursively moves directory tree
   - Moves all: files, directories and all of their hardlinks
   - Unhide/Rehide objects during move.
