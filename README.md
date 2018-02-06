@@ -11,7 +11,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - Code still needs to be scrubbed as some bunctions are not needed.
   - This script was my arg parser stress-test and where I ironed out a bunch of issues with the arg parser.  Hence, why I'm sharing.
     - Please note, "%" and "?" are problematic in DosBatchlaundio
-	- Update - 02/01/2018 - Currently args parser is somewhat fragile since the last checkin, the entire parser has been replaced.
+	- Update - 02/01/2018 - the entire args parser has been replaced to a shift method (which is now being vetted for issues).
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
 - [hhmmss.cmd](./hhmmss.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - "Complete Edition"
 - [hhmmss.min.cmd](./hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code

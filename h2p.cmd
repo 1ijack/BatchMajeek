@@ -328,14 +328,24 @@ rem
         `echo/-%1`
     ) do for /f "usebackq tokens=1,* delims==:;," %%U in (
         `echo/%%X`
-    ) do if "%%~V" equ "" ( 
-       rem call :func_h2p_match_key_check_value "%%~X" "%~2"
-       rem   above is support for spaced arguments, but there are still some unresolved nuances for live-in-h2p 
+    ) do if "%%~V" equ "" (
            call :func_h2p_match_key_check_value "%%~U" "%%~V"
+    ) else if /i "%%~U" equ "ftp"    ( 
+           call :func_h2p_match_key_check_value "%%~X"
+    ) else if /i "%%~U" equ "file"   ( 
+           call :func_h2p_match_key_check_value "%%~X"
+    ) else if /i "%%~U" equ "http"   ( 
+           call :func_h2p_match_key_check_value "%%~X"
+    ) else if /i "%%~U" equ "https"  ( 
+           call :func_h2p_match_key_check_value "%%~X"
+    ) else if /i "%%~U" equ "stream" (
+           call :func_h2p_match_key_check_value "%%~X"
     ) else call :func_h2p_match_key_check_value "%%~U" "%%~V"
 
     shift /1 
 goto %~0
+       rem call :func_h2p_match_key_check_value "%%~X" "%~2"
+       rem   above is support for spaced arguments, but there are still some unresolved nuances for live-in-h2p 
 
 
 
@@ -345,7 +355,18 @@ goto %~0
     if /i "-%~1" equ "-h"      call :func_h2p_pargs_help "%~2" & goto :eof
     if /i "-%~1" equ "-help"   call :func_h2p_pargs_help "%~2" & goto :eof
 
-
+    
+    rem  ghetto WA for known uris 
+    if /i "%~1" equ "ftp"    ( call %~0 "%~1:%~2"
+                               goto :eof )
+    if /i "%~1" equ "file"   ( call %~0 "%~1:%~2"
+                               goto :eof )
+    if /i "%~1" equ "http"   ( call %~0 "%~1:%~2"
+                               goto :eof )
+    if /i "%~1" equ "https"  ( call %~0 "%~1:%~2"
+                               goto :eof )
+    if /i "%~1" equ "stream" ( call %~0 "%~1:%~2"
+                               goto :eof )
 
     rem  debug dump
     if defined debug_h2p_msgs (
@@ -369,34 +390,19 @@ goto %~0
 
 
 
-    rem  run args
-    rem    Gogogo, through the Side-door -- relaunch script to run env set
-    rem    Gogogo Note: If that hairy GoGoGo remains uncaught, it "Gogogoes" a 1go, a 2go, and a 3go continues to next param
-    rem  run args w/a
-    if /i "-%~1" equ "---Gogogougo-Gougogo--" (
-        rem  Taking the "bullet" out of the chamber making sure that the env is eval'd once
-        rem  Just like a locked gun, this block shouldn't trigger, but, weirder things have happened. 
-        rem    Weeeeee, we're goofing offffff and getting PAID.  Thats what Im talking aboot
-        rem    Heavy Indian Accent: Jus, a-take-it.  And-a GO.
-    goto :eof )
-    
-    
     if /i "-%~1" equ "-done" (
-        REM call "%~f0" "--Gogogougo-Gougogo--"
         call :func_h2p_aprocess_varset
         call :func_h2p_a_whole_new_world  "h2p_"
         goto :eof
     ) 
 
     if /i "-%~1" equ "-run"  (
-        REM call "%~f0" "--Gogogougo-Gougogo--"
         call :func_h2p_aprocess_varset
         call :func_h2p_a_whole_new_world  "h2p_"
         goto :eof
     ) 
 
     if /i "-%~1" equ "-go"   (
-        REM call "%~f0" "--Gogogougo-Gougogo--"
         call :func_h2p_aprocess_varset
         call :func_h2p_a_whole_new_world  "h2p_"
         goto :eof
