@@ -23,4 +23,5 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - Unhide/Rehide objects during move.
   - Requires sysinternals "[findlinks.exe](https://docs.microsoft.com/en-us/sysinternals/downloads/findlinks )" to expose all hardlinks.
   - DOES NOT remove the old tree on purpose
+- [pidme.cmd](./pidme.cmd ) -- Launches command and returns it's PID using powershell
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
