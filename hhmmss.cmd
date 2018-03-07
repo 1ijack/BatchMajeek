@@ -366,7 +366,7 @@ goto :eof
     if %hms_now_sec%1 equ 211  echo/"Sorry Millie, but I hear seconds and speak days"
     if %hms_now_sec%1 equ 221  echo/"That magical second when a minute changes into an hour"
     if %hms_now_sec%1 equ 231  echo/"did you know, that a broken clock is right twice a day"
-    if %hms_now_sec%1 equ 241  echo/"For a gay ol'time, hhmmss! (sounded good at the time)"
+    if %hms_now_sec%1 equ 241  echo/"For a gay ol'time, hhmmss! (sounded grand at the time)"
     if %hms_now_sec%1 equ 251  echo/"Need and hour? Give me a second, (and 3599 more)"
     if %hms_now_sec%1 equ 261  echo/"You dont understand Zero, what it feels like to always be a 9!"
     if %hms_now_sec%1 equ 271  echo/ ^"Sorry Millie, Second^'s a 100 times more time, &echo/         than you^'ll ever hope to be^!^"
