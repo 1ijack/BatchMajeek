@@ -208,8 +208,11 @@ rem  Writes to StndOut
 rem    Note: Param1 "varName" -- This is the varLabel/Name (not the value)
 rem    Note: Param2 "timeInSeconds-Optional" -- Original Secs value 
 :func_hms_MisterDank_AB_reporter
-    if "%~1" equ ""    exit /b 101
-    if not defined %~1 exit /b 101
+    if "%~1" equ "" ( exit /b 101 ) else if not defined %~1 exit /b 101
+    
+    if "%~2" equ "" ( call echo/%%%~1%%
+    ) else call echo/%~2 ^*%%%~1%%
+    goto :eof
     
     if "%~2" equ "" for /f "tokens=2 delims==" %%C in ('set %~1') do echo/%%~C
     if "%~2" equ "" goto :eof
