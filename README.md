@@ -9,6 +9,9 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - [elevate/elevate.cmd](./elevate/elevate.cmd ) -- self-elevate using "bunction" labels
   - [elevate/elvn.cmd](./elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
   - [elevate/elvc.cmd](./elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
+- [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
+  - to generate 10 strings: for /l %Z in (1,1,10) do [gstr.cmd](./gstr.cmd )
+  - to generate 3 strings, 12, 15, 50 characters: [gstr.cmd](./gstr.cmd ) 12 15 50 
 - [h2p.cmd](./h2p.cmd ) -- grabs pdfs of url address using "[wkhtmltopdf.exe](https://wkhtmltopdf.org/downloads.html)".  
   - Names pdf file with urlstring+currentdate
   - Code still needs to be scrubbed as some bunctions are not needed.
