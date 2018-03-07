@@ -6,7 +6,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
 - [elevate](./elevate/) -- self-elevate scripts, functions and examples using "bunction" labels
-  - [elevate/elevate.cmd](./elevate/elevate.cmd ) -- self-elevate using "bunction" labels
+  - [elevate/elevate.cmd](./elevate/elevate.cmd ) -- elevates all passed arguments or starts a elevated cmd console
   - [elevate/elvn.cmd](./elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
   - [elevate/elvc.cmd](./elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
 - [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
