@@ -1,4 +1,4 @@
-::  by JaCk  |  Release 01/20/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/elevate/elevate.cmd   |  elevate.cmd  --  checks current env to see if we're already elevated, when not, we relaunch elevated and launch the piggybacked arguments
+::  by JaCk  |  Release 03/07/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/elevate/elevate.cmd   |  elevate.cmd  --  checks current env to see if we're already elevated, when not, we relaunch elevated and launch the piggybacked arguments
 :: 
 ::::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
