@@ -22,10 +22,12 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [hhmmss.min.cmd](./hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
 - [md5.cmd](./md5.cmd ) -- hashes files and directories with optional recursion, unicode and logging options
 - [mvlinks.bat](./mvlinks.bat ) -- Recursively moves directory tree
-  - Moves all: files, directories and all of their hardlinks
+  - Moves all: files, directories and hardlinks
+  - Recreates hardlinked files during move.
   - Unhide/Rehide objects during move.
   - For now, requires sysinternals "[findlinks.exe](https://docs.microsoft.com/en-us/sysinternals/downloads/findlinks )" to expose all hardlinks.
   - DOES NOT remove the old tree on purpose
+  - DOES NOT move/update junctions or symlinks
 - [pidme.cmd](./pidme.cmd ) -- Launches command and returns it's PID using powershell
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
 - [RemoveEmpties.bat](./RemoveEmpties.bat ) -- Removes Empty Files/SubDirectories from the defaulted/given path(s)
