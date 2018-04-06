@@ -1,7 +1,7 @@
 # BatchMajeek
 Mysterious Windows Batch/Cmd scripts -- My personal, public exposition.
 
-## Please world, see my junk... No I don't care what you think.
+## Please world, see my junk... No I don't care what you think. (unless you find issues)
 Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
@@ -34,3 +34,6 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - My use-case: remove leftover files/dirs from the temp directories
   - determines whether file is empty (by file size)
   - determines whether directory is empty.  This detection is somewhat slow at the moment, I may improve the detection at a later date.
+
+## Other majeekal (and demoralizing) repos written by batchCraftsmen (or sorcerers)
+- [https://github.com/FrankWestlake/CMD-scripts](https://github.com/FrankWestlake/CMD-scripts) - a repo by Frank Westlake that turned [me](https://github.com/1ijack) into a jellyfish of despair
