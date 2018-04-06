@@ -1,6 +1,6 @@
 ::  by JaCk  |  Release 10/05/2017  |  https://github.com/1ijack/BatchMajeek/blob/master/mvlinks.bat  | mvlinks.bat -- uses sysinternals findlinks.exe to recursively dump linkcount and links from a root directory and then move entire structure to another root source directory.  Should handle almost all filenames thrown at it.
 ::::::::::  ::::  ::::  ::::  :::::::::
-@echo off & setlocal DisableDelayedExpansion EnableExtensions & (for /f "tokens=1 delims==" %%V in ('set mlk_') do set "%%V=") 2>nul 1>nul
+@echo off & setlocal DisableDelayedExpansion EnableExtensions & ( (for /f "tokens=1 delims==" %%V in ('set mlk_') do set "%%V=") 2>nul 1>nul )
 
 ::: Settings and vars ::::::
 ::
@@ -32,10 +32,10 @@ rem Type: int: [0/1/etc] -- Internal Counter, do not modify unless you know what
 
 ::: Init - Check n Check :::  Run Main  ::: Deinit -- clean up and leave
 call :func_mlk_init
-if "%errorlevel%" neq "0" echo/Error: Too Lazy to print &goto :eof 
+if "%errorlevel%" neq "0" ( ( echo/Error: Generic: Too Lazy to print details) & goto :eof )
 call :func_mlk_get_and_process_links "%mlk_root_dirtree_src%"
 call :func_mlk_uninit
-timeout /t 25
+if "%~1%~2%~3" equ "" timeout /t 25
 goto :eof
 
 
@@ -53,7 +53,7 @@ goto :eof
 ::        BatchLike-functions        ::
 :::                                 :::
 :::::::::::::::::::::::::::::::::::::::
-goto :eof
+                              goto :eof
 
 
 rem   Unless Noted, the following applies to all "Bunctions"
@@ -91,7 +91,7 @@ rem  Basic script requirements/dependencies check
     ) 2>nul 1>nul
     if not defined mk_fln_bin ( 
         echo/Error: Fatal: Unable to locate "findlinks.exe" or variable "mk_fln_bin" is undefined/incorrect.
-        echo/Error: Fatal: Please make sure %~0 can see "findlinks.exe"
+        echo/Error: Fatal: Please make sure "%~0" can see "findlinks.exe"
     ) 1>&2
     if not exist "%mk_fln_bin%" exit /b 1
     
@@ -100,15 +100,25 @@ rem  Basic script requirements/dependencies check
     if not defined mlk_root_dirtree_new call :func_mlk_define_path  mlk_root_dirtree_new   "%~2"  "&echo/Hint: Enter New Drive Letter:&echo/&echo/Input: New-Root: Directory/Drive" "N:"
 
     rem check, check-it-out, check, check-it-out
-    for %%A in (
-        %mlk_root_dirtree_src%
-        %mlk_root_dirtree_new%
-    ) do call :func_mlk_check_path "" "%%~A"
+    call :func_path_walker %mlk_root_dirtree_src% %mlk_root_dirtree_new%
 
 goto :eof
 :::::::::::::::::::::::::::::::::::::::
 
 
+::  Usage  ::  func_path_walker  path1  "path2"  etc
+rem  A shifter way to cycle through paths
+:func_path_walker
+    set /a "mlk_path_walker{counter{blank}}+=1"
+    if "%~1" neq "" set "mlk_path_walker{counter{blank}}=0"
+    if %mlk_path_walker{counter{blank}}%. geq 9. ( ( set "mlk_path_walker{counter{blank}}=" ) & goto :eof )
+
+    if "%~1" neq "" call :func_mlk_check_path "" "%~1"
+
+    shift /1
+    goto %~0
+    
+goto :eof
 
 ::: Main - get links and move files
 ::
@@ -137,8 +147,8 @@ rem  Errlvl returns codes:
 rem    0 -- Path Exists
 rem    1 -- Path Inaccessible or Does not exist
 :func_mlk_check_path
-    if "1%~2" equ "1" goto :eof
-    if "1%~1" neq "1" set "%~1=true"
+    if "%~2" equ "" goto :eof
+    if "%~1" neq "" set "%~1=true"
     
     if "%~a2" neq "" exit /b 0
     if exist "%~2" exit /b 0
@@ -149,10 +159,10 @@ rem    1 -- Path Inaccessible or Does not exist
     2>nul 1>nul dir /b /a "%~2"
     if "%errorlevel%" equ "0" goto :eof
 
-    if "1%~1" neq "1" set "%~1="
-    if "1%~3" neq "1" exit /b 1
+    if "%~1" neq "" set "%~1="
+    if "%~3" neq "" exit /b 1
     
-    1>&2 echo/ Error: Check Path: Unable to locate "%~3"
+    1>&2 echo/ Error: Check Path: Unable to locate "%~2"
     
     exit /b 1
 
@@ -171,13 +181,12 @@ rem    optionalPromptMsg -- When needed to promp user, Use this text
     if "%~1" equ "" goto :eof 
     if "%~2" neq "" set "%~1=%~2"
 
-    if defined %~1 call :func_mlk_check_path "%%%~1%%"
-    
-    if defined %~1 call echo "%%%~1%%"
+    if defined %~1 call :func_mlk_check_path "" "%%%~1%%"
+    if defined %~1 ( ( call echo "%%%~1%%" ) & goto :eof )
     REM pause
     
-    if not defined %~1 if "%~3" neq "" call :func_mlk_get_user_input "%~1"         "%~3"            "%~4"
-    if not defined %~1 if "%~3" equ "" call :func_mlk_get_user_input "%~1"   "Input: Path of %~1"   "%~4"
+    if "%~3" neq "" call :func_mlk_get_user_input "%~1"         "%~3"            "%~4"
+    if "%~3" equ "" call :func_mlk_get_user_input "%~1"   "Input: Path of %~1"   "%~4"
     
 goto :eof
 
@@ -188,17 +197,17 @@ rem  Process all objects found in directory tree
 :func_mlk_get_and_process_links
     if "%~1" equ "" goto :eof
     
-    for /f "tokens=1* delims=" %%F in (
+    for /f "tokens=* delims=" %%F in (
         'dir /s /b /o /a:-d "%~1"'
-    ) do if "%%~nF" neq "" call :subr_mlk_links_process "%%~F"
+    ) do if "%%~nF" neq "" call :subr_mlk_links_process_findlinks "%%~F"
 
 goto :eof
 
 
-    :: Usage :: subr_mlk_links_process    "Path"
+    :: Usage :: subr_mlk_links_process_findlinks    "Path"
     rem  Processes Object: unhides, Moves, removes, relinks, rehides objects from one dirtree to another
     rem  
-    :subr_mlk_links_process
+    :subr_mlk_links_process_fsutil
         if "%~1" equ "" goto :eof
         
         call :func_mlk_unhide "%~1"
@@ -208,6 +217,40 @@ goto :eof
         ) do for %%l in ( 
             %%~L 
         ) do if 9%%~l gtr 90 call :func_mlk_floop_add_one   "%~1"  "%%~l"
+        if not defined mlk_bool_mv_type_all goto :eof
+
+        
+        for /f "tokens=2 delims=: " %%L in (
+            'findlinks -nobanner "%~1" ^| findstr /i /C:"Links:"'
+        ) do for %%l in ( 
+            %%~L 
+        ) do call :func_mlk_floop_add_one   "%~1" "%%~l"
+        
+        rem get hardlink
+        for /F "usebackq tokens=2* delims=:" %%L in (
+            `"%SystemRoot%\System32\fsutil.exe" hardlink list "%~1"`
+        ) do "%SystemRoot%\System32\fsutil.exe" hardlink list "%%~L"
+        
+        
+    goto :eof
+
+    
+"%SystemRoot%\System32\fsutil.exe" hardlink list "%~1" | findstr /n .* | findstr /b /v 1
+
+
+    :: Usage :: subr_mlk_links_process_findlinks    "Path"
+    rem  Processes Object: unhides, Moves, removes, relinks, rehides objects from one dirtree to another
+    rem  
+    :subr_mlk_links_process_findlinks
+        if "%~1" equ "" goto :eof
+        
+        call :func_mlk_unhide "%~1"
+        
+        if not defined mlk_bool_mv_type_all for /f "tokens=2 delims=: " %%L in (
+            'findlinks -nobanner "%~1" ^| findstr /i /C:"Links:"'
+        ) do for %%l in ( 
+            %%~L 
+        ) do if %%~l. gtr 0. call :func_mlk_floop_add_one   "%~1"  "%%~l"
         if not defined mlk_bool_mv_type_all goto :eof
 
         
@@ -265,10 +308,10 @@ rem    func  flag_disable_state
     
     set "mlk__BoP="
     for /f "tokens=1,* delims==" %%U in ('set "%~1"') do if "%%~U" neq "" set "mlk__BoP=%%V"
-    if not defined mlk__BoP set "%~1=" & exit /b 0
+    if not defined mlk__BoP ( ( set "%~1=" ) & exit /b 0 )
     
     set "%~1=true"
-    for %%A in (1 y p a t) do if /i "j%mlk__BoP:~0,1%" equ "j%%~A" ( set "mlk__BoP=" & goto :eof )
+    for %%A in (1 y p a t) do if /i "j%mlk__BoP:~0,1%" equ "j%%~A" ( ( set "mlk__BoP=" ) & goto :eof )
     
     set "%~1="
     set "mlk__BoP="
