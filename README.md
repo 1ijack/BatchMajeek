@@ -34,6 +34,10 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - My use-case: remove leftover files/dirs from the temp directories
   - determines whether file is empty (by file size)
   - determines whether directory is empty.  This detection is somewhat slow at the moment, I may improve the detection at a later date.
+- [unixTime.bat](./unixTime.bat ) -- returns the current system time as unix time (01/01/1970 )
+  - Adjusts to system timezone and DST (or any other time adjustments registered with windows)
+  - Returns unixTime in Seconds OR milliseconds, option defined in 'user settings' inside the script
+  - Auto calculates leap-year(s)
 
 ## Other majeekal (and demoralizing) repos written by batchCraftsmen (or sorcerers)
 - [https://github.com/FrankWestlake/CMD-scripts](https://github.com/FrankWestlake/CMD-scripts) - a repo by Frank Westlake that turned [me](https://github.com/1ijack) into a jellyfish of despair
