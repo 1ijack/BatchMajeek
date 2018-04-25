@@ -13,11 +13,10 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - to generate 10 strings: for /l %Z in (1,1,10) do [gstr.cmd](./gstr.cmd )
   - to generate 3 strings, 12, 15, 50 characters: [gstr.cmd](./gstr.cmd ) 12 15 50 
 - [h2p.cmd](./h2p.cmd ) -- grabs pdfs of url address using "[wkhtmltopdf.exe](https://wkhtmltopdf.org/downloads.html)".  
-  - Names pdf file with urlstring+currentdate
-  - Code still needs to be scrubbed as some bunctions are not needed.
-  - This script was my arg parser stress-test and where I ironed out a bunch of issues with the arg parser.  Hence, why I'm sharing.
-    - Please note, "%" and "?" are problematic at the moment, hopefully, I'll have a fix soon
-	- Update - 02/01/2018 - the entire args parser has been replaced to a shift method (which is now being vetted for issues).
+  - Code has been mostly scrubbed and unused functions have been removed.
+  - Names pdf file with urlstring+currentdateStamp
+  - ASCII encoded URL names decoded for auto-filename generator
+  - Support for special characters in URL namespace
 - [hhmmss.cmd](./hhmmss.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - "Complete Edition"
 - [hhmmss.min.cmd](./hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
 - [md5.cmd](./md5.cmd ) -- hashes files and directories with optional recursion, unicode and logging options

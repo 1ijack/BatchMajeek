@@ -28,9 +28,10 @@ goto :eof
 :conf_script_settings
     set "_h2p_auto_output=i like turtles"  rem  Does not prompt the user for filename, just generates one automaticly
     set "_h2p_auto_session=ah yeeeeeeh"    rem  Only prompt once, until I changed env/session. When prompted, use either, a, auto
-    set "debug_h2p_msgs="                  rem  Dump imbedded debug info during execution, each msg dump adds about 10 ms of additional work
-    set "debug_h2p_grab_lnum=yarrr aye"    rem  Dump line number of msg in script. Depends on debug_h2p_msgs
-    set "debug_h2p_terse_msgs=jesPlease"   rem  undef is Very Verbose, you would get var dumps per each debug msg call and debug debug dumps.  Depends on debug_h2p_msgs
+
+    rem  the following debug switches change the behavor of the debug function 'func_h2p_dump_debug_msg'
+    set "debug_h2p_grab_lnum=yarrr aye"    rem  Dump line number of msg in script. 
+    set "debug_h2p_terse_msgs=jesPlease"   rem  undef is Very Verbose, you would get var dumps per each debug msg call and debug debug dumps.  
 goto :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -48,7 +49,6 @@ goto :eof rem   -- When you think you've seen it all... Fatch out for Bunctions.
 ::  Usage  ::  func_h2p_ahelp_me
 rem  Dumps loads and loads of halpsmes.
 :func_h2p_ahelp_me
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Halps meh pl0x"     "%~0 %~1"           "%debug_h2p_terse_msgs%" 
     echo/
     echo/                          --  %~nx0  -- 
     echo/  --  feature-rich wrapper around the feature-rich "wkhtmltopdf" binary  --  
@@ -70,7 +70,7 @@ REM echo/
 REM echo/       Note:  parameters\args "go,run,done" are used to tell the script to process the args submitted and reset for more args
 REM echo/
     echo/   More help options: 
-    echo/         %~nx0 --help:[ params^| vars^| variables^| debug^| full]
+    echo/         %~nx0 --help:[ params^| vars^| variables^| full]
     echo/
     echo/
 goto :eof
@@ -79,7 +79,6 @@ goto :eof
 rem  Dumps loads and loads of halps.
 rem  Like, everywhere
 :func_h2p_ahelp_params
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Halps params pl0x"     "%~0"           "%debug_h2p_terse_msgs%" 
     echo/
     echo/%~nx0 Help: Params 
     echo/
@@ -98,7 +97,6 @@ REM echo/
     echo/  Accepted Parameters:
     echo/               /?, -h, --help   Displays the help info, Additional options:
     echo/                --help:params     params - dump argument\parameter usage
-    echo/                 --help:debug     debug - dump debug\advanced usage
     echo/                  --help:full     full - dump all help info
     echo/                               
     echo/                   --auto, -a   Script generated filename. Do not use with --output:file
@@ -120,15 +118,15 @@ REM echo/
     echo/                               
     echo/                      --norun  prints final command to console instead of running;
     echo/ 
-    echo/    --binary:"<path\bin.exe>"  Debug: Optional: Use the defined binary instead of Current: 
+    echo/    --binary:"<path\bin.exe>"  Use the defined binary instead of Current: 
     echo/          -b:"<path\bin.exe>"    [wkhtmltopdf.exe] "%_h2p_binary%"
     echo/ 
-    echo/      --add-opts:"<add opts>"  Debug: Optional: Prepends additional binary parameters 
+    echo/      --add-opts:"<add opts>"  Prepends additional binary parameters 
     echo/              -n:"<add opts>"  Current: 
 
-    rem  Limit to only 60 characters
-    if "%_h2p_bin_opts:~0,60%" equ "%_h2p_bin_opts%" ( echo/                                  %_h2p_add_opts% %_h2p_bin_opts%
-                                                ) else echo/                                  %_h2p_add_opts% %_h2p_bin_opts:~0,60%...
+    rem  Limit to only 30 characters
+    if "%_h2p_bin_opts:~0,30%" equ "%_h2p_bin_opts%" ( echo/                                  %_h2p_add_opts% %_h2p_bin_opts%
+                                                ) else echo/                                  %_h2p_add_opts% %_h2p_bin_opts:~0,30%...
     echo/
 
 goto :eof
@@ -136,7 +134,6 @@ goto :eof
 ::  Usage  ::  func_h2p_ahelp_pebug
 rem  Dumps brickloads of halps to stdout
 :func_h2p_ahelp_pars
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Halps vars pl0x"     "%~0"           "%debug_h2p_terse_msgs%" 
     echo/      
     echo/%~nx0 Help: Script Variables 
     echo/      
@@ -176,98 +173,22 @@ rem  Dumps brickloads of halps to stdout
     echo/                               - ignored when using arg-param2 as output filename 
     echo/                               - ignored when h2p_output is defined
     echo/
-    echo/             "debug_h2p_msgs"  Debug flag, when true, starts script with debug msgs
-    echo/                               - change to "false" args: --debug:off, --debug:output:off, --debug:output:info:on
-    echo/                               - change to "true"  agrs: --debug:on,  --debug:output:on,  --debug:output:info:off
-    echo/
-    echo/        "debug_h2p_grab_lnum"  Debug behavorial flag, when true, dumps line numbers for all internal debug msgs.
-    echo/                               - dependant on "debug_h2p_msgs" setting\state
-    echo/                               - some args to modify state: --debug:lines:off, --debug:lines:on
-    echo/
-    echo/       "debug_h2p_terse_msgs"  Debug behavorial flag, when true, does NOT dump all (non-debug) script vars to console.
-    echo/                               - dependant on "debug_h2p_msgs" setting\state
-    echo/                               - some args to modify state: --debug:terse:off, --debug:terse:on
-    echo/
 goto :eof
-
-
-::  Usage  ::  func_h2p_ahelp_pebug
-rem  Imagine a giant halps.  This same gaint halps, is now being dumped to stdout.
-rem  Dumps hecka halps, like, too much. halps.
-:func_h2p_ahelp_pebug
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Halps pebug pl0x"     "%~0"           "%debug_h2p_terse_msgs%" 
-    echo/
-    echo/%~nx0 Help: Adv\Debug
-    echo/Debug Switches: rem ::  %~nx0 -debug:"[[enable|disable]:[trace|lines|output] | [output:[info|terse|verbose|trace]]"
-    echo/  Note: Bool Switches 
-    echo/    where you see  "on", ok to use instead: true,  +,  yes,  on,  aye, enable,  accepted, hecka-ya, surething,    IAlsoLikeTurtles
-    echo/    where you see "off", ok to use instead: false, -,  no,   off, nay, disable, denied,   hecka-no, IDontThinkSo, under9000,  NoMilk
-    echo/
-    echo/          --debug, --debug:on  Turn on debug messages, Default verbosity: terse
-    echo/                  --debug:off    off
-    echo/
-    echo/              --debug:off:all  Sets all debug options to off+verbose
-    echo/              --debug:on:all     on+terse+trace
-    echo/
-    echo/              --debug:verbose  Toggle on/off [parameter dumps per debug message]
-    echo/          --debug:verbose:off    off -- set verbosity to terse
-    echo/          --debug:verbose:on     on  -- set verbosity to verbose
-    echo/          --debug:off:verbose    off -- set verbosity to terse
-    echo/          --debug:on:verbose     on  -- set verbosity to verbose
-    echo/
-    echo/          --debug:output       Turn on debug output, default verbosity: terse;  trace to off
-    echo/          --debug:output:on      on, default verbosity: terse; sets trace to off
-    echo/          --debug:output:off     off debug messages; sets trace to off
-    echo/    --debug:output:lines:off     off - don't show lines with debug msgs
-    echo/    --debug:output:lines:on      on  - do show lines with debug msgs
-    echo/    --debug:output:trace:off     off - set echo off -- independent of debug\verbosity settings
-    echo/    --debug:output:trace:on      on  - set echo on -- print every script line pre-eval AND post eval;
-    echo/                                         independent of debug\verbosity settings
-    echo/    --debug:output:info:off      off - turn on debug messages;  sets trace to off
-    echo/    --debug:output:info:on       on  - turn off debug messages; sets trace to off
-    echo/    --debug:output:terse:off     off - set verbosity to verbose; sets trace to off
-    echo/    --debug:output:terse:on      on  - set verbosity to terse;   sets trace to off
-    echo/  --debug:output:verbose:off     off - set verbosity to terse;   sets trace to off
-    echo/  --debug:output:verbose:on      on  - set verbosity to verbose; sets trace to off
-    echo/
-    echo/            --debug:terse:off  Terse off -- set verbosity to verbose
-    echo/            --debug:terse:on     on   -- set verbosity to terse
-    echo/            --debug:off:terse    off  -- set verbosity to verbose
-    echo/            --debug:on:terse     on   -- set verbosity to terse
-    echo/
-    echo/                --debug:trace  Toggle on/off [changes echo on/off] -- independent of debug\verbosity settings
-    echo/            --debug:trace:off    off -- changes to echo off -- independent of debug\verbosity settings
-    echo/            --debug:trace:on     on  -- changes to echo on  -- independent of debug\verbosity settings
-    echo/            --debug:off:trace    off -- changes to echo off -- independent of debug\verbosity settings
-    echo/            --debug:on:trace     on  -- changes to echo on  -- independent of debug\verbosity settings
-    echo/
-    echo/                --debug:lines  Toggle on/off [Dump line numbers in debug msgs]
-    echo/            --debug:lines:off    off -- No, don't show line numbers for debug messages.
-    echo/            --debug:lines:on     on  -- Yes, show line numbers for debug messages.
-    echo/            --debug:off:lines    off -- No, don't show line numbers for debug messages.
-    echo/            --debug:on:lines     on  -- Yes, show line numbers for debug messages.
-goto :eof
-
 
 
 :func_h2p_mein
     call :func_h2p_a_whole_new_world
     call :conf_user_settings
     call :conf_script_settings
+    goto :func_h2p_Shifty_Argument
+goto :eof
 
-    rem  W/A for a bug in interpreter 
-    if .%1. equ ./?. (
-        call :func_h2p_pargs_help %2
-        goto :eof
-    )
     
-    call :func_h2p_Shifty_Argument %*
-    
+:func_h2p_post_args
     rem  Runs script -- Only when unresolved run-counters exist -- OR -- When counters are not set 
     rem    only when defined counters; and arg counter is positive
     rem    Need to make counter when url is def, then compare with total runs; only run when values dont match
     if "%_h2p_arg_checked_count%" gtr "1" (
-        echo _h2p_arg_checked_count "%_h2p_arg_checked_count%" 
         if defined _h2p_runAcnt (
             if defined _h2p_runTcnt (
                 if "%_h2p_runAcnt%" neq "%_h2p_runTcnt%" call :func_h2p_aprocess_varset
@@ -275,10 +196,10 @@ goto :eof
         ) else call :func_h2p_aprocess_varset
     ) else call :func_h2p_pargs_help
 
-
     rem  End of script
     call :func_h2p_a_whole_new_world
     endlocal
+
 goto :eof
 
 
@@ -305,63 +226,65 @@ rem  Key-Value pair limitations: Value CANNOT BE DEFINED via white-space (althou
 rem       k v, -k v, --k v, /-k v, /k v    -- Examples of what NOT to do
 rem     
 :func_h2p_Shifty_Argument
-    set /a "_h2p_arg_checked_count+=1"
-    set /a "_h2p_blank_counter+=1"
+    set /a "_h2p_arg_checked_count+=1 , _h2p_blank_counter+=1"
+
+    rem  Adjust blank counter
+    if "%~1" neq "" set "_h2p_blank_counter=0"
+
+    if %_h2p_blank_counter% gtr 0 (
+        rem  Under threshold, reloop back around checking the next arg
+        shift /1 
+        if %_h2p_blank_counter% lss 9 goto :func_h2p_Shifty_Argument
+
+        rem  Over threshold, adjust argCount and leave function/label
+        set /a "_h2p_arg_checked_count-=%_h2p_blank_counter%"
+        set "_h2p_blank_counter="
+        goto :func_h2p_post_args
+    )
+
+    set "h2p_currArg{One}=%~1"
+    set "h2p_currArg{Two}=%~2"
     set /a "_h2p_arg_shift+=1"
 
-    if "%~1" equ "" (
-        if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "empty arg check" " %0 - empty/arg# arg %_h2p_blank_counter%"  "%debug_h2p_terse_msgs%"
-
-        rem   leave after nine blank consecutive parameters
-        if "%_h2p_blank_counter%" geq "9" ( 
-        if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "empty arg limit" " [%_h2p_blank_counter%] hit leaving %0"  "%debug_h2p_terse_msgs%"
-            set "_h2p_blank_counter="
-            goto :eof 
-        )
-
-        rem  Adjust argument placement count; Needs to stay after the empty check to count empty args placement as well
-        set /a "_h2p_arg_checked_count-=1"
-        
-        for /l %%S in (1,1,%_h2p_arg_shift%) do shift /1
-        goto %~0
-    )
-
-    set "_h2p_blank_counter="
-
-    rem  W/A for a bug in interpreter 
-    if .%1. equ ./?. ( ( call :func_h2p_pargs_help  "%~2" )
-        shift /1
-        goto %~0
-    )
-
-    rem  strip arg prefix and expose keyPairs/swtiches
-    for /f "usebackq tokens=* delims=+/-" %%X in (
+    rem  when arg is not empty strip arg prefix and expose/parse keyPairs/switches
+    if "%~1" neq "" if .%1. equ ./?. (
+        rem  W/A for a bug in interpreter; 
+        call :func_h2p_match_key_check_value "help" "%~2"
+    ) else for /f "usebackq tokens=* delims=+/-" %%X in (
         `echo/-%1`
     ) do for /f "usebackq tokens=1,* delims==:;," %%U in (
         `echo/%%X`
-    ) do if "%%~V" equ "" (
-           call :func_h2p_match_key_check_value "%%~X"  "%~2"
-    ) else if /i "%%~U" equ "ftp"    ( 
-           call :func_h2p_match_key_check_value "%%~X"
-    ) else if /i "%%~U" equ "file"   ( 
-           call :func_h2p_match_key_check_value "%%~X"
-    ) else if /i "%%~U" equ "http"   ( 
-           call :func_h2p_match_key_check_value "%%~X"
-    ) else if /i "%%~U" equ "https"  ( 
-           call :func_h2p_match_key_check_value "%%~X"
-    ) else if /i "%%~U" equ "stream" (
-           call :func_h2p_match_key_check_value "%%~X"
+    ) do if "%~1" equ "%%~X" (
+        rem  UnNamed argument
+        set "h2p_currArg{One}=%%~X"
+        set "h2p_currArg{Two}="
+        call :func_h2p_match_key_check_value "%%~X"
+    ) else if "%%~V" equ "" if "%h2p_currArg{One}:~-1,1%" equ ":" (
+        rem  Named Argument separated by a colon AND an unquoted white-space separator
+        set "h2p_currArg{One}=%%~U"
+        set "h2p_currArg{Two}=%~2"
+        call :func_h2p_match_key_check_value "%%~U" "%~2"
+        set /a "_h2p_arg_shift-=1"
+    ) else if "%%~V" equ "" (
+        rem  Named Argument separated by a white-space
+        set "h2p_currArg{One}=%%~X"
+        set "h2p_currArg{Two}=%~2"
+        call :func_h2p_match_key_check_value "%%~X"  "%~2"
     ) else (
-           call :func_h2p_match_key_check_value "%%~U" "%%~V"
-           set /a "_h2p_arg_shift-=1"
+        rem  Named Argument separated by a colon,semi-colon,comma;  rem  pre-remove a shift value
+        set "h2p_currArg{One}=%%~U"
+        set "h2p_currArg{Two}=%%~V"
+        call :func_h2p_match_key_check_value "%%~U" "%%~V"
+        set /a "_h2p_arg_shift-=1"
     )
 
+    rem  shift arguments -- as much as needed,  Number NEEDS to be positive;  rem  reset shift; loop back
     if %_h2p_arg_shift% lss 1 set "_h2p_arg_shift=1"
-    for /l %%S in (1,1,%_h2p_arg_shift%) do (
-        shift /1
-        set /a "_h2p_arg_shift-=1"        
-    )
-goto %~0
+    for /l %%S in (1,1,%_h2p_arg_shift%) do shift /1
+    set "_h2p_arg_shift="
+    goto :func_h2p_Shifty_Argument
+
+goto :eof
        rem call :func_h2p_match_key_check_value "%%~X" "%~2"
        rem   above is support for spaced arguments, but there are still some unresolved nuances for live-in-h2p
 
@@ -370,69 +293,50 @@ goto %~0
 :func_h2p_match_key_check_value
 
     rem  Help args
-    if    "-%~1" equ "-?"      ( ( call :func_h2p_pargs_help "%~2" ) & goto :eof )
-    if /i "-%~1" equ "-h"      ( ( call :func_h2p_pargs_help "%~2" ) & goto :eof )
-    if /i "-%~1" equ "-help"   ( ( call :func_h2p_pargs_help "%~2" ) & goto :eof )
+    if   "-%~1" equ "-?"     goto :func_h2p_pargs_help
+    if /i "%~1" equ "h"      goto :func_h2p_pargs_help
+    if /i "%~1" equ "help"   goto :func_h2p_pargs_help
 
     
     rem  ghetto WA for known uris 
     if /i "%~1" equ "ftp"    ( 
-        call %~0 "%~1:%~2"
+        call %~0 "%~1:%h2p_currArg{Two}%"
         goto :eof 
     )
 
     if /i "%~1" equ "file"   ( 
-        call %~0 "%~1:%~2"
+        call %~0 "%~1:%h2p_currArg{Two}%"
         goto :eof 
     )
 
     if /i "%~1" equ "http"   ( 
-        call %~0 "%~1:%~2"
+        call %~0 "%~1:%h2p_currArg{Two}%"
         goto :eof 
     )
 
     if /i "%~1" equ "https"  ( 
-        call %~0 "%~1:%~2"
+        call %~0 "%~1:%h2p_currArg{Two}%"
         goto :eof 
     )
 
     if /i "%~1" equ "stream" ( 
-        call %~0 "%~1:%~2"
+        call %~0 "%~1:%h2p_currArg{Two}%"
         goto :eof 
     )
 
-    rem  debug dump
-    if defined debug_h2p_msgs (
-        call :func_h2p_dump_debug_msg  "ArgsPharseU parsed key "   "%~1"   "%debug_h2p_terse_msgs%" 
-        call :func_h2p_dump_debug_msg  "ArgsPharseV parsed value " "%~2"   "%debug_h2p_terse_msgs%" 
-    )
-
-    rem  debug args
-    if /i "-%~1" equ "-debug" (
-        if "-%~2" equ "-" (
-           set "debug_h2p_msgs=true" 
-        ) else for %%b in (
-            %2
-        ) do for /f "tokens=1-3 delims=:-" %%g in (
-            "-%%~b"
-        ) do call :func_h2p_pargs_debug %%g %%h %%i
-        goto :eof
-    ) 
-
-
-    if /i "-%~1" equ "-done" (
+    if /i "%~1" equ "done" (
         call :func_h2p_aprocess_varset
         call :func_h2p_a_whole_new_world  "h2p_"
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-run"  (
+    if /i "%~1" equ "run"  (
         call :func_h2p_aprocess_varset
         call :func_h2p_a_whole_new_world  "h2p_"
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-go"   (
+    if /i "%~1" equ "go"   (
         call :func_h2p_aprocess_varset
         call :func_h2p_a_whole_new_world  "h2p_"
         goto :eof
@@ -441,28 +345,28 @@ goto %~0
     
 
     rem  url args
-    if /i "-%~1" equ "-u"    (
+    if /i "%~1" equ "u"    (
         if defined h2p_url (
             call :func_h2p_aprocess_varset
             call :func_h2p_a_whole_new_world  "h2p_"
         )
 
-        if "-%~2" equ "-" echo/-u:"expecting url"
+        if "%~2" equ "" echo/-u:"expecting url"
         
-        set "h2p_url=%~2"
+        set "h2p_url=%h2p_currArg{Two}%"
         set /a "_h2p_arg_shift+=1"
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-url" (
+    if /i "%~1" equ "url" (
         if defined h2p_url (
             call :func_h2p_aprocess_varset
             call :func_h2p_a_whole_new_world  "h2p_"
         )
 
-        if "-%~2" equ "-" echo/--url:"expecting url"
+        if "%~2" equ "" echo/--url:"expecting url"
 
-        set "h2p_url=%~2"
+        set "h2p_url=%h2p_currArg{Two}%"
         set /a "_h2p_arg_shift+=1"
         goto :eof
     ) 
@@ -470,7 +374,7 @@ goto %~0
 
 
     REM rem  silent output args
-    REM if /i "-%~1" equ "-silent" ( 
+    REM if /i "%~1" equ "silent" ( 
     REM     if "-%~2" equ  "-"    ( set "_h2p_silent=true"  
     REM     ) else if "-%~2" equ "-on"   ( set "_h2p_silent=true"  
     REM     ) else if "-%~2" equ "-off"    set "_h2p_silent="  
@@ -479,8 +383,8 @@ goto %~0
 
 
     rem  output filename args
-    if /i "-%~1" equ "-o" (
-        if "-%~2" equ "-" (
+    if /i "%~1" equ "o" (
+        if "%~2" equ "" (
             echo/-o:"expecting path\filename.pdf"
         ) else if "-%~2" equ "-auto" (
             call :func_h2p_guess_auto h2p_output
@@ -489,8 +393,8 @@ goto %~0
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-output" (
-        if "-%~2" equ "-" (
+    if /i "%~1" equ "output" (
+        if "%~2" equ "" (
             echo/-output:"expecting path\filename.pdf"
         ) else if "-%~2" equ "-auto" (
             call :func_h2p_guess_auto h2p_output
@@ -499,12 +403,12 @@ goto %~0
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-a" ( 
+    if /i "%~1" equ "a" ( 
         call :func_h2p_guess_auto h2p_output
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-auto" ( 
+    if /i "%~1" equ "auto" ( 
         call :func_h2p_guess_auto h2p_output
         goto :eof
     ) 
@@ -512,8 +416,8 @@ goto %~0
     
     
     rem  additional binargs args
-    if /i "-%~1" equ "-n" (
-        if "-%~2" equ "-" (
+    if /i "%~1" equ "n" (
+        if "%~2" equ "" (
             echo/--add-opts:"additional options"
             echo/   Or   -n:"additional options"
         ) 
@@ -523,8 +427,8 @@ goto %~0
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-add-opts" (
-        if "-%~2" equ "-"  echo/--add-opts:"additional options"
+    if /i "%~1" equ "add-opts" (
+        if "%~2" equ ""  echo/--add-opts:"additional options"
         
         set "_h2p_add_opts=%~2"
         set /a "_h2p_arg_shift+=1"
@@ -534,13 +438,13 @@ goto %~0
     
     
     rem  additional binargs-overwrite args
-    if /i "-%~1" equ "-no" (
+    if /i "%~1" equ "no" (
         set "_h2p_bin_opts=%~2"
         set /a "_h2p_arg_shift+=1"
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-add-opts-overwrite" (
+    if /i "%~1" equ "add-opts-overwrite" (
         set "_h2p_bin_opts=%~2"
         set /a "_h2p_arg_shift+=1"
         goto :eof
@@ -549,16 +453,16 @@ goto %~0
     
     
     rem  pdfbin args
-    if /i "-%~1" equ "-b" (
-        if "-%~2" equ "-" (
+    if /i "%~1" equ "b" (
+        if "%~2" equ "" (
             echo/-b:"expecting path\BinName"
         ) else set "_h2p_binary=%~2"
         set /a "_h2p_arg_shift+=1"
         goto :eof
     ) 
 
-    if /i "-%~1" equ "-binary" ( 
-        if "-%~2" equ "-" (
+    if /i "%~1" equ "binary" ( 
+        if "%~2" equ "" (
             echo/--binary:"expecting path\BinName"
         ) else set "_h2p_binary=%~2"
         set /a "_h2p_arg_shift+=1"
@@ -568,18 +472,21 @@ goto %~0
     
         
     rem  norun args
-    if /i "-%~1" equ "-norun" (
+    if /i "%~1" equ "norun" (
         set "_h2p_norun=true"
+        if "%~2" equ "" goto :eof
+        for %%g in ( true  yes on  aye enable  "+" hecka-ya accepted surething IAlsoLikeTurtles  ) do if /i "-%~2" equ "-%%~g"  ( ( ( set /a "_h2p_arg_shift+=1" ) & set "_h2p_norun=true" ) & goto :eof )
+        for %%g in ( false no  off nay disable "-" hecka-no denied IDontThinkSo under9000 NoMilk ) do if /i "-%~2" equ "-%%~g"  ( ( ( set /a "_h2p_arg_shift+=1" ) & set "_h2p_norun="     ) & goto :eof )
         goto :eof
     ) 
     
 
-
+    
     rem  unresolved unnamed args
     if /i  "%~1" neq "" (
         rem unless defined, 1st param: url, 2nd param: output file
         if not defined h2p_url ( 
-            set "h2p_url=%~1"
+            set "h2p_url=%h2p_currArg{One}%"
         ) else if not defined h2p_output set "h2p_output=%~1"
         set /a "_h2p_arg_shift+=1"
         goto :eof
@@ -619,15 +526,13 @@ rem    First, Evaluates current variable set for errors. attempts to fix any iss
 rem    Next,  runs Main -- http to pdf
 rem    Last,  clear subprocess vars
 :func_h2p_aprocess_varset
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "subprocess url-out-set "     " %~0 "           "%debug_h2p_terse_msgs%" 
-    
     rem  to disable other execution methods
     if /i "%~1" equ "run" set /a "_h2p_runAcnt+=1"
     set /a "_h2p_runTcnt+=1"
 
     rem  check n fix dependencies; error when unresolved
     call :func_h2p_check_deps   h2p_errcnt
-    if not "1%h2p_errcnt%" equ "10" ( echo/ Error: %h2p_errcnt% checks failed, cannot continue &exit /b %h2p_errcnt% ) 1>&2
+    if not "%h2p_errcnt%" equ "0" ( ( echo/ Error: %h2p_errcnt% checks failed, cannot continue) & exit /b %h2p_errcnt% ) 1>&2
     
     rem  run bin to generate pdf from url
     call :func_h2p_gen_pdf
@@ -635,9 +540,6 @@ rem    Last,  clear subprocess vars
     rem  reset/unset session run vars
     call :func_h2p_a_whole_new_world  "h2p_" 2>nul 1>nul 
 
-    if defined debug_h2p_msgs ( 
-        call :func_h2p_dump_debug_msg  "subprocess varcleared "     " %~0 - Current Setvars "           "Dumpit" 
-    ) 2>nul
 goto :eof
 
 
@@ -647,7 +549,6 @@ rem    Errlvl   0  =  No failures
 rem    Errlvl 1##  =  Failed 1## of checks
 rem    Errlvl 456  =  Function took a crap
 :func_h2p_check_deps
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "check and verify"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
     if "%~1" equ "" ( ( call %~0  "h2p_errcnt" ) & goto :eof ) else set "%~1=0"
 
     rem  resolve when unset
@@ -671,16 +572,15 @@ rem    Errlvl 456  =  Function took a crap
     if "%h2p_output:~-1,1%" equ "/" call :func_h2p_outdir_prefix_auto  h2p_output  "%h2p_output%"
     
     rem  AUTO resolve output filename when still unset; "this should never happen..." said NoOne, ever
-    if not defined h2p_output     call :func_h2p_guess_auto       h2p_output
-    
-    
+    if not defined h2p_output       call :func_h2p_guess_auto          h2p_output
+
     rem  error when unset
-    if not defined h2p_url       set /a "%~1+=1" 
-    if not defined _h2p_binary   set /a "%~1+=1"
-    if not exist "%_h2p_binary%" set /a "%~1+=1" 
-    if not defined h2p_output    set /a "%~1+=1" 
+    if not defined h2p_url       set /a "%~1+=1"
+    if not defined h2p_output    set /a "%~1+=1"
+    if not defined _h2p_binary ( set /a "%~1+=1" ) else if not exist "%_h2p_binary%" set /a "%~1+=1"
 
     if not defined %~1 exit /b 456
+
     for /f "tokens=1,* delims==" %%U in ('set %~1') do exit /b %%~V
     exit /b
     
@@ -696,7 +596,6 @@ rem  Auto generates filename and prepends string before it.  Does this only once
         goto :eof
     ) 2>nul
 
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "affix preffix "     " %~0 - %~1 %~2"           "%debug_h2p_terse_msgs%" 
     set "h2p_preVar=%~2"
     set "%~1="
 
@@ -718,11 +617,6 @@ rem             func_h2p_fix_url_25x -- pads upto 25 instances --
 rem             func_h2p_fix_url_51x -- pads upto 51 instances -- VERY expensive load 
 rem    Note: When "norun" is passed in as param1, leaves bunction before command "runs"
 :func_h2p_gen_pdf
-    if defined debug_h2p_msgs (
-        call :func_h2p_dump_debug_msg  "Runs external bin to gen pdf"     " %~0 %~1"           "%debug_h2p_terse_msgs%"
-        call :func_h2p_dump_debug_msg              ""                  " Dumping Vars %~nx0%~0"
-    )
-
     if defined _h2p_silent ( call %~0 %*
         goto :eof
     ) 2>nul 1>nul
@@ -749,14 +643,12 @@ goto :eof
 ::  Usage  ::  func_h2p_get_time_string   returnVar
 rem  Returns string with YYYY.MM.DD.TimeInSecs
 :func_h2p_get_time_string
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "time to string together time "     " %~0 - %~1 "           "%debug_h2p_terse_msgs%" 
     if "%~1" equ "" goto :eof
 
     call :func_h2p_calc_timestamp h2p_dtsecs_ "%time%"
     if not defined h2p_dtsecs_ ( set "%~1=%date:~-4,4%.%date:~4,2%.%date:~7,2%"
 	) else set "%~1=%date:~-4,4%.%date:~4,2%.%date:~7,2%.%h2p_dtsecs_%"
     
-    call :func_h2p_dump_debug_msg  "time to string together Result"     " %~0 - %date:~-4,4%.%date:~4,2%.%date:~7,2%.%h2p_dtsecs_% "           "%debug_h2p_terse_msgs%" 
     set "h2p_dtsecs_="
 
     if not defined %~1 exit /b 1
@@ -778,8 +670,7 @@ rem ~~~~~~~~~~~~ sec calc below ~~~~~~~~~~~~
     rem calc secs in today -- rounds 51ms+ to 1 sec and w/a for octals by ((1xx + 1xx) / 300)
     :func_h2p_calc_timestamp_ezrnd_ms
         if "%~1" equ "" goto :eof
-        if "%~2" neq "" ( set "_scest=%~2"
-        ) else set "_scest=%time%"
+        if "%~2" neq "" ( set "_scest=%~2" ) else set "_scest=%time%"
         
         set /a "%~1=((1%_scest:~-2% + 1%_scest:~-2%) / 300) + (1%_scest:~-5,2% - 100) + ((1%_scest:~3,2% - 100) * 60 ) + ((%_scest:~0,2% * 60) * 60)"
         set "_scest="
@@ -788,8 +679,7 @@ rem ~~~~~~~~~~~~ sec calc below ~~~~~~~~~~~~
     rem calc secs in today -- rounds 51ms+ to 1 sec and w/a for octals -- extra steps to round 51ms+ to secs
     :func_h2p_calc_time_nezrnd_ms
         if "%~1" equ "" goto :eof
-        if "%~2" neq "" ( set "_scest=%~2"
-        ) else set "_scest=%time%"
+        if "%~2" neq "" ( set "_scest=%~2" ) else set "_scest=%time%"
 
         set /a "%~1=(1%_scest:~-5,2% - 100) + ((1%_scest:~3,2% - 100) * 60 ) + ((%_scest:~0,2% * 60) * 60)"
         if defined %~1 if %_scest:~-2,2% gtr 50 set /a "%~1+=1"
@@ -800,8 +690,7 @@ rem ~~~~~~~~~~~~ sec calc below ~~~~~~~~~~~~
     rem   works, has a issue when trying to work with non-octal numbers like: 07,08,09
     rem   no support for supplied time
     :func_h2p_01112018_calc_time_secs
-        if "%~1" equ "" goto :eof
-        set /a "%~1=%time:~-5,2% + (%time:~3,2% * 60 ) + ((%time:~0,2% * 60) * 60)"
+        if "%~1" neq "" set /a "%~1=%time:~-5,2% + (%time:~3,2% * 60 ) + ((%time:~0,2% * 60) * 60)"
     goto :eof
     
 rem ~~~~~~~~~~~~ mss calc below ~~~~~~~~~~~~
@@ -810,14 +699,13 @@ rem ~~~~~~~~~~~~ mss calc below ~~~~~~~~~~~~
     :func_h2p_time_calc_today_ms
         if "%~1" equ "" goto :eof
         set /a "%~1=( 1%time:~-2% - 100 ) + (( 1%time:~-5,2% - 100 ) * 1000) + (( 1%time:~3,2% - 100 ) * 60000 ) + (( %time:~0,2% + 2 - 2) * 3600000)"
-        set "%~1+=0"
+        set /a "%~1+=0"
     goto :eof
 
     rem calc ms in today OR a suppyled HH:MM:SS.MS time
     :func_h2p_time_calc_ms
         if "%~1" equ "" goto :eof
-        if "%~2" neq "" ( set "_smst=%~2"
-        ) else set "_smst=%time%"
+        if "%~2" neq "" ( set "_smst=%~2" ) else set "_smst=%time%"
 
         set /a "%~1=( 1%_smst:~-2% - 100 ) + (( 1%_smst:~-5,2% - 100 ) * 1000) + (( 1%_smst:~3,2% - 100 ) * 60000 ) + (( %_smst:~0,2% + 2 - 2) * 3600000)"
         set "_smst="
@@ -832,8 +720,6 @@ rem  Prompts User for input
 rem    Quoted parameters optional, double-quotes will be dropped regardless, White-spaces ignored between params
 rem    Example:   func_h2p_get_user_input   varUserFeedback   "Input: User: Did you like %~nx0"   "N/A"
 :func_h2p_get_user_input
-        if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "User Input requested"     " %~0 - %~2 - %~1 Default - %~3"           "%debug_h2p_terse_msgs%" 
-
     if "%~1" equ "" goto :eof
 
     if "%~2" neq "" echo/%~2
@@ -853,7 +739,6 @@ rem    2 - Generates a name based on the tld.timestamp
 rem    3 - Generates a name with a timestamp
 :func_h2p_guess_auto
     if "%~1" equ "" exit /b 456
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "auto filename suggestion"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
     if "%~2" equ "" if defined h2p_url (
         call %~0   %1   "%h2p_url%"
         goto :eof
@@ -867,7 +752,8 @@ rem    3 - Generates a name with a timestamp
     if "%~2" equ "" goto :eof
     
     rem url -- leave early
-    call :func_h2p_guess_outname   "%~1"  "%~2"
+    REM call :func_h2p_guess_outname   "%~1"  "%~2"
+    call :func_h2p_guess_outname   "%~1"  h2p_url
     if defined %~1 (
         for /f "tokens=1,* delims==" %%A in ('set "%~1"') do set "%~1=%%~B.%h2p_YyyyMmDdSecs%.pdf"
         goto :eof
@@ -887,13 +773,13 @@ rem    1 - Generates a file name based on the url.timestamp, then prompts user i
 rem    2 - Generates a file name based on the tld.timestamp, then prompts user if they want to change it
 rem    3 - Generates a file name with a timestamp, then prompts user if they want to change it
 :func_h2p_guess_n_ask
-    if "%~1" equ "" ( exit /b 456 ) else if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "prompt user after filename suggestion"     " %~0 - %~1"           "%debug_h2p_terse_msgs%" 
 
     call :func_h2p_get_time_string h2p_YyyyMmDdSecs
 
-    call :func_h2p_guess_outname   "%~1"  "%~2"
+    REM call :func_h2p_guess_outname   "%~1"  "%~2"
+    call :func_h2p_guess_outname   "%~1"  h2p_url
 
-    if defined %~1 for /f "tokens=1,* delims==" %%A in ('set "%~1"') do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
+    if defined %~1     for /f "tokens=1,* delims==" %%A in ('set "%~1"') do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
     if not defined %~1 for /f "tokens=2 delims==/?!&,;@#" %%B in ("%~2") do call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%%~B.%h2p_YyyyMmDdSecs%.pdf"
     if not defined %~1 call :func_h2p_get_user_input  "%~1"  "&echo/  Input: User: Enter output path\filename"   "%h2p_YyyyMmDdSecs%" 
 
@@ -902,20 +788,28 @@ rem    3 - Generates a file name with a timestamp, then prompts user if they wan
 goto :eof
 
 
-::  Usage  :: func_h2p_guess_outname  returnVar  "url"
+::  Usage  :: func_h2p_guess_outname  returnVar  "urlVarNameOrString"
 rem  Creates a recommendation for an output file name
 :func_h2p_guess_outname
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "using url for filename suggestion"     " %~0 - %~1 : %~2 "           "%debug_h2p_terse_msgs%" 
     if "%~2" equ "" exit /b 456
     if "%~1" equ "" exit /b 456
     
+    if not defined %2 ( 
+        set "url_outGuess{Two}=%~2"
+    ) else call set "url_outGuess{Two}=%%%~2%%"
+
+    call :func_h2p_url_decode  "url_outGuess{Two}"  %2
+
     set "h2p_clncntr="
     set "%~1="
     
+    rem  Supa-Lazy name
+    for /f "tokens=* delims=" %%A in ( "%url_outGuess{Two}%"
+    ) do if "%%~nxA" neq "" set "%~1=%%~nxA.%computername%"
+
     rem  Guesstimate amount of crap to clean up; ( 2(A+B) + Num-Url-Parts )
-    for /f "tokens=1-26 delims==/?!&,;@\" %%A in ( "%~2"
+    for /f "tokens=1-26 delims==/?!&,;@\" %%A in ( "%url_outGuess{Two}%"
     ) do if "%%~A" neq "" (
-        set "%~1=%~nx2.%computername%"
         if "%%~A" neq "file:" set "%~1=%%~C %%~D %%~E %%~F %%~G %%~H %%~I %%~J %%~K %%~L %%~M %%~N %%~O %%~P %%~Q %%~R %%~S %%~T %%~U %%~V %%~W %%~X %%~Y %%~Z.%%~B"
 
         for %%g in ( %%A %%B %%C %%D %%E %%F %%G %%H %%I %%J %%K %%L %%M %%N %%O %%P %%Q %%R %%S %%T %%U %%V %%W %%X %%Y %%Z 
@@ -935,12 +829,12 @@ goto :eof
     ::  Usage  ::  guess_outname_chqNstrp   "keyVar"  "optional-loopDebugCount"
     rem  Janitor of "_.-?"
     :sub_chqNstrp__h2p_guess_outname
-        if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "subroutine - scrubbing url"     " %~0 - %~1 - %~2"           "%debug_h2p_terse_msgs%" 
         rem insanity check
-        if "1%~1" equ "1" exit /b 456
+        if "%~1" equ "" exit /b 456
         
         rem  define, strip and clean -- characers/spaces can be weird and messy
-        for /f "tokens=1,* delims==" %%U in ('set "%~1"') do set "h2p_go_sA_=%%~V"
+        REM for /f "tokens=1,* delims==" %%U in ('set "%~1"') do call set "h2p_go_sA_=%%~V"
+        call set "h2p_go_sA_=%%%~1%%"
         
         rem  scrub-de-dub-do-dat~dampt. *looks around*
         rem    starts sing'n:  "scrub-de-dub-do-dat~damt-dum-ding-clang-clash, popt-dupt-phromt-dead-deddeddeddendt. done-pun-bang-poptposhphrosh"
@@ -970,10 +864,122 @@ goto :eof
     goto :eof
 
 
+::  Usage  ::  func_h2p_url_decode   returnVar   varNameOrString
+rem  Converts URL from encoded (alt hex codes) characters to their ASCII/UTF equivalent 
+rem  Note:  This method is NOT PERFECT and has issues (as in multiple percentage signs next to each other are treated as 1 percentage sign): example, function sees: 100%%%%%001  => 100%001
+rem  Note, partial legend below:
+rem       :::: Reserved characters after percent-encoding
+rem       ::   !	#	$	&	'	(	)	*	+	,	/	:	;	=	?	@	[	]
+rem       ::  %21	%23	%24	%26	%27	%28	%29	%2A	%2B	%2C	%2F	%3A	%3B	%3D	%3F	%40	%5B	%5D
+rem       ::
+rem       :::: Common characters after percent-encoding (ASCII or UTF-8 based) 
+rem       ::  wsp = whitespace
+rem       ::   CR	LF	wsp	"	%	-	.	<	>	\	^	_	`	{	|	}	~
+rem       ::  %0D	%0A	%20	%22	%25	%2D	%2E	%3C	%3E	%5C	%5E	%5F	%60	%7B	%7C	%7D	%7E
+:func_h2p_url_decode
+    if "%~2" equ "" goto :eof
+    if "%~1" equ "" goto :eof
+
+    rem  Get the string (when string IS A VARIABLE, value as the string supersedes the varName)
+    set "url_decode{Two}=%~2"
+    if defined %2 call set "url_decode{Two}=%%%~2%%"
+
+    rem  prep/run subroutine
+    set "url_decode{A}="
+    set "url_decode{B}=%url_decode{Two}%"
+    call :subr_h2p_acsii_alt2chr_loop
+    
+    rem  return converted string 
+    set "%~1=%url_decode{A}%"
+    set "url_decode{A}="
+    set "url_decode{B}="
+    
+    goto :eof
+
+    rem  ________________________________________________________
+    rem  --------------------------------------------------------
+    rem  below loop consists of 255 ASCII characters for decoding
+    rem     ---  Character Code Information/Description  ---  
+    rem  ________________________________________________________
+    rem  --------------------------------------------------------
+    rem  
+    rem  - ASCII control character codes 00-1F [Decimal 0-31] 
+    rem  --- unprintable control codes used to control devices
+    rem  
+    rem  - ASCII printable character codes 20-7F [Decimal 32-127] 
+    rem  --- 'printable characters' - typical keyboard characters
+    rem  
+    rem  - extended ASCII character codes 80-FF [decimal 128-255] 
+    rem  --- ISO 8859-1, aka ISO Latin-1
+    rem  --- Microsoft® Windows Latin-1 extended character codes:
+    rem  ----- 81-9F [decimal 129-159]
+    rem  ________________________________________________________
+    rem  --------------------------------------------------------
+    :subr_h2p_acsii_alt2chr_loop
+        if not defined url_decode{B} goto :eof
+
+        if "%url_decode{B}:~0,1%" equ "%%" (
+            for /f "tokens=* delims=%%" %%A in (
+                "%url_decode{B}%"
+            ) do (
+                set "url_decode{B}=%%%%~A"
+                if "%%~A" equ "" goto :eof
+            ) 
+        ) else for /f "tokens=1* delims=%%" %%A in (
+            "%url_decode{B}%"
+        ) do (
+            set "url_decode{B}=%%%%~B"
+            set "url_decode{A}=%url_decode{A}%%%~A"
+            if "%%~B" equ "" goto :eof
+        ) 
+
+        rem  Manual replacement for these problematic characters:
+        rem  --  "22|""; "2A|*"; "3F|?"; "7C||"; 
+        if    "%url_decode{B}:~1,2%" equ "22" set "url_decode{A}=%url_decode{A}%""
+        if /i "%url_decode{B}:~1,2%" equ "2A" set "url_decode{A}=%url_decode{A}%*"
+        if /i "%url_decode{B}:~1,2%" equ "3F" set "url_decode{A}=%url_decode{A}%?"
+        if /i "%url_decode{B}:~1,2%" equ "7C" set "url_decode{A}=%url_decode{A}%|"
+
+        rem  replacing 'lineFeed' (0A) with a 'whitespace' and 'carriageReturn' (0D) with nothing 
+        @for %%A in (
+            "00|";  "01|";  "02|";  "03|";  "04|";  "05|";  "06|";  "07|";  "08|";  "09|";  "0A| "; "0B|";  "0C|";  "0D|";  "0E|";  "0F|";  
+            "10|";  "11|";  "12|";  "13|";  "14|";  "15|";  "16|";  "17|";  "18|";  "19|";  "1A|";  "1B|";  "1C|";  "1D|";  "1E|";  "1F|";  
+            "20| "; "21|!"; "22|";  "23|#"; "24|$"; "25|%"; "26|&"; "27|'"; "28|("; "29|4"; "2A|";  "2B|+"; "2C|,"; "2D|-"; "2E|."; "2F|/";
+            "30|0"; "31|1"; "32|2"; "33|3"; "34|4"; "35|5"; "36|6"; "37|7"; "38|8"; "39|9"; "3A|:"; "3B|;"; "3C|<"; "3D|="; "3E|>"; "3F|";
+            "40|@"; "41|A"; "42|B"; "43|C"; "44|D"; "45|E"; "46|F"; "47|G"; "48|H"; "49|I"; "4A|J"; "4B|K"; "4C|L"; "4D|M"; "4E|N"; "4F|O";
+            "50|P"; "51|Q"; "52|R"; "53|S"; "54|T"; "55|U"; "56|V"; "57|W"; "58|X"; "59|Y"; "5A|Z"; "5B|["; "5C|\"; "5D|9"; "5E|^"; "5F|_";
+            "60|`"; "61|a"; "62|b"; "63|c"; "64|d"; "65|e"; "66|f"; "67|g"; "68|h"; "69|i"; "6A|j"; "6B|k"; "6C|l"; "6D|m"; "6E|n"; "6F|o";
+            "70|p"; "71|q"; "72|r"; "73|s"; "74|t"; "75|u"; "76|v"; "77|w"; "78|x"; "79|y"; "7A|z"; "7B|{"; "7C|";  "7D|}"; "7E|~"; "7F|";
+            "E0|à"; "E1|á"; "E2|â"; "E3|ã"; "E4|ä"; "E5|å"; "E6|æ"; "E7|ç"; "E8|è"; "E9|é"; "EA|ê"; "EB|ë"; "EC|ì"; "ED|í"; "EE|î"; "EF|ï";
+            "80|€"; "81|";  "82|‚"; "83|ƒ"; "84|„"; "85|…"; "86|†"; "87|‡"; "88|ˆ"; "89|‰"; "8A|Š"; "8B|‹"; "8C|Œ"; "8D|";  "8E|Ž"; "8F|"; 
+            "90|";  "91|‘"; "92|’"; "93|“"; "94|”"; "95|•"; "96|–"; "97|—"; "98|˜"; "99|™"; "9A|š"; "9B|›"; "9C|œ"; "9D|";  "9E|ž"; "9F|Ÿ";
+            "A0| "; "A1|¡"; "A2|¢"; "A3|£"; "A4|¤"; "A5|¥"; "A6|¦"; "A7|§"; "A8|¨"; "A9|©"; "AA|ª"; "AB|«"; "AC|¬"; "AD|­"; "AE|®"; "AF|¯";
+            "B0|°"; "B1|±"; "B2|²"; "B3|³"; "B4|´"; "B5|µ"; "B6|¶"; "B7|·"; "B8|¸"; "B9|¹"; "BA|º"; "BB|»"; "BC|¼"; "BD|½"; "BE|¾"; "BF|¿";
+            "C0|À"; "C1|Á"; "C2|Â"; "C3|Ã"; "C4|Ä"; "C5|Å"; "C6|Æ"; "C7|Ç"; "C8|È"; "C9|É"; "CA|Ê"; "CB|Ë"; "CC|Ì"; "CD|Í"; "CE|Î"; "CF|Ï";
+            "D0|Ð"; "D1|Ñ"; "D2|Ò"; "D3|Ó"; "D4|Ô"; "D5|Õ"; "D6|Ö"; "D7|×"; "D8|Ø"; "D9|Ù"; "DA|Ú"; "DB|Û"; "DC|Ü"; "DD|Ý"; "DE|Þ"; "DF|ß";
+            "F0|ð"; "F1|ñ"; "F2|ò"; "F3|ó"; "F4|ô"; "F5|õ"; "F6|ö"; "F7|÷"; "F8|ø"; "F9|ù"; "FA|ú"; "FB|û"; "FC|ü"; "FD|ý"; "FE|þ"; "FF|ÿ";
+        ) do for /f "tokens=1,2 delims=|" %%B in ( 
+            "%%~A"
+        ) do if /i "%url_decode{B}:~1,2%" equ "%%~B" (
+            rem  when the value matches, replace character and remove the alt hex code
+            set "url_decode{A}=%url_decode{A}%%%~C"
+            set "url_decode{B}=%url_decode{B}:~3%"
+            goto %~0
+        )
+
+        rem  when the value does NOT match, move string to base-string and remove from check-string
+        set "url_decode{A}=%url_decode{A}%%url_decode{B}:~0,3%"
+        set "url_decode{B}=%url_decode{B}:~3%"
+
+    goto %~0
+
+goto :eof
+
+
+
 ::  Usage  ::  func_h2p_whereForFile  returnVar   "FileOrBinaryName" 
 rem  returns param1 set to found path. Uses pure batch method to locate the binary in param2
 :func_h2p_whereForFile
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Looking for bins with purebatch"     " %~0 - %~1 - %~2 "           "%debug_h2p_terse_msgs%" 
     if "%~2" equ "" ( exit /b 456 ) else if "%~1" equ "" ( exit /b 456 ) else set "%~1="
 
     rem  Add to search path: script dir, current directory, pathVar
@@ -1001,7 +1007,6 @@ goto :eof
 rem  returns param1 set to found path. Uses where.exe to locate the binary in param2
 rem    Note:  Param3 is an optional Bool, Returns only first path when multiple are found
 :func_h2p_where_bin
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Looking for bins with where.exe"     " %~0 - %~1 - %~2 - Bool: %~3"           "%debug_h2p_terse_msgs%" 
     if "%~2" equ "" ( exit /b 456 ) else if "%~1" equ "" ( exit /b 456 ) else set "%~1="
     
     for /f "delims=" %%W in ('"%SystemRoot%\system32\where.exe" /f "%~2"') do if "%%~W" neq "" if "%~3" neq "" ( if not defined %~1 set "%~1=%%~W"
@@ -1057,7 +1062,6 @@ rem   Examples  ---  To dump all vars and not print other messages       ---  fu
 rem             ---  To print MsgHeader and MsgText without dumping Vars ---  func   "INIT: " "Errorlevel is !errorlevel!"  0
 rem   Note:  Originally this was split into 3 bunctions to better display/understand the inner mechz, but, this script needs to be as lean as possible.
 :func_h2p_dump_debug_msg
-    if not defined debug_h2p_msgs goto :eof
     if "%~1" equ "" if "%~3" neq "" goto :eof
     
     set "_h2p__ddbgln_A="
@@ -1083,285 +1087,48 @@ goto :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::: Unused bunctions -- included for edge case workarounds
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-::  Usage  ::  func_h2p_fix_url
-rem  This is to add an additional perc-sign per perc-sign.  Use ONLY when absolutly needed to "call" the url as this is a huge waste of time/resources
-rem    Note:  Example: changes  http://123.abc/%something%else  to  http://123.abc/%%something%%else
-:func_h2p_fix_url
-    if defined debug_h2p_msgs call :func_h2p_dump_debug_msg  "Wow, um, so... um, you do hate yourself"      " sadist much? %~0"             "%debug_h2p_terse_msgs%" 
-    if not defined h2p_url goto :eof
-    
-    for /f "tokens=1-26 delims=%%" %%A in ("%h2p_url%") do if "%%~Z" neq "" ( set "h2p_url=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~Z"
-    ) else if "%%~Y" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y"
-    ) else if "%%~X" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X"
-    ) else if "%%~W" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W"
-    ) else if "%%~V" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V"
-    ) else if "%%~U" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U"
-    ) else if "%%~T" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T"
-    ) else if "%%~S" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S"
-    ) else if "%%~R" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R"
-    ) else if "%%~Q" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q"
-    ) else if "%%~P" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P"
-    ) else if "%%~O" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O"
-    ) else if "%%~N" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N"
-    ) else if "%%~M" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M"
-    ) else if "%%~L" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L"
-    ) else if "%%~K" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K"
-    ) else if "%%~J" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J"
-    ) else if "%%~I" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I"
-    ) else if "%%~H" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H"
-    ) else if "%%~G" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G"
-    ) else if "%%~F" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F"
-    ) else if "%%~E" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E"
-    ) else if "%%~D" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D"
-    ) else if "%%~C" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C"
-    ) else if "%%~B" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B"
-    ) else if "%%~A" neq "" ( set "h2p_url_percd=%%~A"
-    )
-    
-goto :eof
-
-::  Usage  ::  func_h2p_fix_url_51x
-rem  This is to add an additional perc-sign per perc-sign.  Use ONLY when absolutly needed to "call" the url as this is a huge waste of time/resources
-rem    Note:  Example: changes  http://123.abc/%something%else  to  http://123.abc/%%something%%else
-rem    Note:  can only change 51 instances per submission; why not 52, uses 26th instance to restart a loop.  Nothing is stopping YOU from creating a limitless shift loop instead ;]
-:func_h2p_fix_url_51x
-    
-    for /f "tokens=1-26* delims=%%" %%A in ("%h2p_url%") do if "%%~Z" neq "" ( for /f "tokens=1-26* delims=%%" %%a in ("%%~Z") do if "%%~z" neq "" ( set "h2p_url=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t%%%%%%~u%%%%%%~v%%%%%%~w%%%%%%~x%%%%%%~y%%%%%%~z"
-    ) else if "%%~y" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t%%%%%%~u%%%%%%~v%%%%%%~w%%%%%%~x%%%%%%~y"
-    ) else if "%%~x" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t%%%%%%~u%%%%%%~v%%%%%%~w%%%%%%~x"
-    ) else if "%%~w" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t%%%%%%~u%%%%%%~v%%%%%%~w"
-    ) else if "%%~v" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t%%%%%%~u%%%%%%~v"
-    ) else if "%%~u" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t%%%%%%~u"
-    ) else if "%%~t" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s%%%%%%~t"
-    ) else if "%%~s" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r%%%%%%~s"
-    ) else if "%%~r" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q%%%%%%~r"
-    ) else if "%%~q" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p%%%%%%~q"
-    ) else if "%%~p" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o%%%%%%~p"
-    ) else if "%%~o" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n%%%%%%~o"
-    ) else if "%%~n" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m%%%%%%~n"
-    ) else if "%%~m" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l%%%%%%~m"
-    ) else if "%%~l" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k%%%%%%~l"
-    ) else if "%%~k" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j%%%%%%~k"
-    ) else if "%%~j" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i%%%%%%~j"
-    ) else if "%%~i" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h%%%%%%~i"
-    ) else if "%%~h" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g%%%%%%~h"
-    ) else if "%%~g" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f%%%%%%~g"
-    ) else if "%%~f" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e%%%%%%~f"
-    ) else if "%%~e" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d%%%%%%~e"
-    ) else if "%%~d" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c%%%%%%~d"
-    ) else if "%%~c" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b%%%%%%~c"
-    ) else if "%%~b" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a%%%%%%~b"
-    ) else if "%%~a" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y%%%%%%~a"
-    )
-    ) else if "%%~Y" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X%%%%%%~Y"
-    ) else if "%%~X" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W%%%%%%~X"
-    ) else if "%%~W" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V%%%%%%~W"
-    ) else if "%%~V" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U%%%%%%~V"
-    ) else if "%%~U" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T%%%%%%~U"
-    ) else if "%%~T" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S%%%%%%~T"
-    ) else if "%%~S" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R%%%%%%~S"
-    ) else if "%%~R" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q%%%%%%~R"
-    ) else if "%%~Q" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P%%%%%%~Q"
-    ) else if "%%~P" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O%%%%%%~P"
-    ) else if "%%~O" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N%%%%%%~O"
-    ) else if "%%~N" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M%%%%%%~N"
-    ) else if "%%~M" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L%%%%%%~M"
-    ) else if "%%~L" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K%%%%%%~L"
-    ) else if "%%~K" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J%%%%%%~K"
-    ) else if "%%~J" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I%%%%%%~J"
-    ) else if "%%~I" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H%%%%%%~I"
-    ) else if "%%~H" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G%%%%%%~H"
-    ) else if "%%~G" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F%%%%%%~G"
-    ) else if "%%~F" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E%%%%%%~F"
-    ) else if "%%~E" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D%%%%%%~E"
-    ) else if "%%~D" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C%%%%%%~D"
-    ) else if "%%~C" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B%%%%%%~C"
-    ) else if "%%~B" neq "" ( set "h2p_url_percd=%%~A%%%%%%~B"
-    ) else if "%%~A" neq "" ( set "h2p_url_percd=%%~A"
-    )
-goto :eof
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::: Args Parse -- Extended
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+::  Usage  ::  func_h2p_pargs_help  optional-NamedArg
+rem  help arg parser, accepts args:
+rem    %1 all
+rem    %1 full
+rem    %1 params
+rem    %1 vars
+rem    %1 variables
 :func_h2p_pargs_help
-    if    "-%~1" equ "-"          ( ( call :func_h2p_ahelp_me     )  & goto :eof )
-    if /i "-%~1" equ "-debug"     ( ( call :func_h2p_ahelp_pebug  )  & goto :eof )
-    if /i "-%~1" equ "-params"    ( ( call :func_h2p_ahelp_params )  & goto :eof )
-    if /i "-%~1" equ "-vars"      ( ( call :func_h2p_ahelp_pars   )  & goto :eof )
-    if /i "-%~1" equ "-variables" ( ( call :func_h2p_ahelp_pars   )  & goto :eof )
+    rem  No args, dump generic help
+    if    "%~1" equ "?"    shift /1
+    if /i "%~1" equ "h"    shift /1
+    if /i "%~1" equ "help" shift /1
+    if    "%~1" equ   ""   goto :func_h2p_ahelp_me
 
-    if /i "-%~1" equ "-full"   (
+    rem  Adjust shift for named args
+    for %%g in ( all full params vars variables ) do if /i "%~1" equ "%%~g" set /a "_h2p_arg_shift+=1"
+    
+    rem  named args
+    if /i "%~1" equ "params"    goto :func_h2p_ahelp_params
+    if /i "%~1" equ "vars"      goto :func_h2p_ahelp_pars
+    if /i "%~1" equ "variables" goto :func_h2p_ahelp_pars
+
+    if /i "%~1" equ "full"   (
         call :func_h2p_ahelp_me
         call :func_h2p_ahelp_params
         call :func_h2p_ahelp_pars
-        call :func_h2p_ahelp_pebug
-        goto :eof 
+        goto :func_h2p_ahelp_pebug
     )
 
-    if /i "-%~1" equ "-all" (
+    if /i "%~1" equ "all" (
         call :func_h2p_ahelp_me
         call :func_h2p_ahelp_params
         call :func_h2p_ahelp_pars
-        call :func_h2p_ahelp_pebug
-        goto :eof
+        goto :func_h2p_ahelp_pebug
     )
 
 goto :eof
 
-::  Usage  ::  func_h2p_pargs_debug    paramSwitches
-rem  sets deubg config based on param switches.
-rem  Note: ForVar to Param mapping:
-rem       -debug:(b) -- -debug:(%~1%~2%~3) -debug:(%1%2%3) 
-rem   -debug:(g,h,i) -- -debug:(%~1,%~2,%~3)
-:func_h2p_pargs_debug
-    if "%~1%~2%~3" equ "" ( ( set "debug_h2p_msgs=true" ) & goto :eof )
-    if    "%~1"    equ "" goto :eof
-
-    set "_h2p_debug_states_true= true  yes on  aye enable  + hecka-ya accepted surething IAlsoLikeTurtles"
-    set "_h2p_debug_states_false=false no  off nay disable - hecka-no denied IDontThinkSo under9000 NoMilk"
-    
-    rem quick quickies [-debug:bool(on):feature]
-    rem Examples: -debug:true:terse
-    rem           -debug:on
-    for %%A in (%_h2p_debug_states_true%) do if /i "%%~A" equ "%~1%~2%~3" (  
-        set "debug_h2p_msgs=true" 
-        goto :eof
-    ) else if /i "%%~A" equ "%~1" (
-               if "%~2%~3" equ    ""     ( set "debug_h2p_msgs=true"
-        ) else if /i "%~2" equ "output"  ( set "debug_h2p_msgs=true"
-        ) else if /i "%~2" equ "debug"   ( set "debug_h2p_msgs=true"
-        ) else if /i "%~2" equ "lines"   ( set "debug_h2p_grab_lnum=true"
-        ) else if /i "%~2" equ "terse"   ( set "debug_h2p_terse_msgs=true"
-        ) else if /i "%~2" equ "verbose" ( set "debug_h2p_terse_msgs="
-        ) else if /i "%~2" equ "all"     (
-                                           set "debug_h2p_msgs=true"
-                                           set "debug_h2p_grab_lnum=true"
-                                           set "debug_h2p_terse_msgs="
-                                           @echo on
-        ) else if /i "%~2" equ "trace"  @( echo on
-        )
-        @goto :eof
-    )
-    
-    rem quick quickies [-debug:bool(off):feature]
-    rem Examples: -debug:disable:lines
-    rem           -debug:off
-    for %%A in (%_h2p_debug_states_false%) do if /i "%%~A" equ "%~1%~2%~3" (
-        @echo off & set "debug_h2p_msgs="
-        goto :eof
-    ) else if /i "%%~A" equ "%~1" (
-               if "%~2%~3" equ    ""     ( set "debug_h2p_msgs="
-        ) else if /i "%~2" equ "output"  ( set "debug_h2p_msgs="
-        ) else if /i "%~2" equ "debug"   ( set "debug_h2p_msgs="
-        ) else if /i "%~2" equ "lines"   ( set "debug_h2p_grab_lnum="
-        ) else if /i "%~2" equ "terse"   ( set "debug_h2p_terse_msgs="
-        ) else if /i "%~2" equ "verbose" ( set "debug_h2p_terse_msgs="
-        ) else if /i "%~2" equ "all"     (
-                                           set "debug_h2p_msgs="
-                                           set "debug_h2p_grab_lnum="
-                                           set "debug_h2p_terse_msgs=true"
-                                           @echo off
-        ) else if /i "%~2" equ "trace"  @( echo off 
-        )
-        @goto :eof
-    )
-
-    rem quick quickies [-debug:[outString]:featureOrBool:Bool]
-    rem Examples: -debug:output:lines:off
-    rem           -debug:debug:off
-    for %%A in ( output debug logging log out ) do if /i "%%~A" equ "%~1" (
-               if "%~2%~3" equ   ""             ( @echo off & set "debug_h2p_msgs=true"
-        ) else if /i "%~2" equ  "on"            ( @echo off & set "debug_h2p_msgs=true"
-        ) else if /i "%~2" equ "off"            ( @echo off & set "debug_h2p_msgs="
-        ) else if /i "%~2" equ "info"           (
-                               @echo off
-            if "%~3" equ ""    set "debug_h2p_msgs=true"
-            if "%~3" equ "on"  set "debug_h2p_msgs=true"
-            if "%~3" equ "off" set "debug_h2p_msgs="
-        
-        ) else if /i "%~2" equ "terse"          (
-                               @echo off
-            if "%~3" equ ""    set "debug_h2p_terse_msgs=true"
-            for %%u in (%_h2p_debug_states_true% ) do if /i "%~3" equ "%%~u" set "debug_h2p_terse_msgs=true"
-            for %%u in (%_h2p_debug_states_false%) do if /i "%~3" equ "%%~u" set "debug_h2p_terse_msgs="
-        
-        ) else if /i "%~2" equ "verbose"        (
-                               @echo off
-            if "%~3" equ ""    set "debug_h2p_terse_msgs="
-            for %%u in (%_h2p_debug_states_true% ) do if /i "%~3" equ "%%~u" set "debug_h2p_terse_msgs="
-            for %%u in (%_h2p_debug_states_false%) do if /i "%~3" equ "%%~u" set "debug_h2p_terse_msgs=true"
-        
-        ) else if /i "%~2" equ "trace"          (
-            if "%~3" equ ""    @echo on
-            for %%u in (%_h2p_debug_states_true% ) do if /i "%~3" equ "%%~u" @echo on
-            for %%u in (%_h2p_debug_states_false%) do if /i "%~3" equ "%%~u" @echo off
-
-        ) else if /i "%~2" equ "lines"          (
-            if "%~3" equ ""    set "debug_h2p_grab_lnum=true"
-            for %%u in (%_h2p_debug_states_true% ) do if /i "%~3" equ "%%~u" set "debug_h2p_grab_lnum=true"
-            for %%u in (%_h2p_debug_states_false%) do if /i "%~3" equ "%%~u" set "debug_h2p_grab_lnum="
-        )
-        @goto :eof
-    )
-
-    rem --debug:lines:undef(toogle(on,off))
-    rem --debug:lines:bool(on,off)
-    if /i "-%~1" equ "-lines" if "%~2" equ "" (
-        if defined debug_h2p_grab_lnum ( echo/--debug:%~1:[on/off] Setting toggle: off
-            set "debug_h2p_grab_lnum="  
-        ) else                         ( echo/--debug:%~1:[on/off] Setting toggle: on
-            set "debug_h2p_grab_lnum=true"
-        )
-        goto :eof
-    ) else (
-        for %%A in (%_h2p_debug_states_true% ) do if /i "%~2" equ "%%~A"  set "debug_h2p_grab_lnum=true"
-        for %%A in (%_h2p_debug_states_false%) do if /i "%~2" equ "%%~A"  set "debug_h2p_grab_lnum="
-        goto :eof
-    )
-
-    rem --debug:trace:undef(toogle(on,off))
-    rem --debug:trace:bool(on,off)
-    if /i "-%~1" equ "-trace" if "%~2" equ "" (
-        for /f "tokens=3 delims=. " %%E in ('echo') do @(
-            if /i "%%~E" equ "on"         @( echo/--debug:%~1:[on/off] Setting toggle: off
-                echo off
-            ) else                        @( echo/--debug:%~1:[on/off] Setting toggle: on
-                echo on
-            )
-        )
-        @goto :eof
-    ) else (
-        @for %%u in (%_h2p_debug_states_true% ) do @if /i "%~2" equ "%%~u" @echo on
-        @for %%u in (%_h2p_debug_states_false%) do @if /i "%~2" equ "%%~u" @echo off
-        @goto :eof
-    )
-
-    rem --debug:verbose:undef(toogle(on,off))
-    rem --debug:verbose:bool(on,off)
-    if /i "-%~1" equ "-verbose" if "%~2" equ "" (
-        if defined debug_h2p_terse_msgs ( echo/--debug:%~1:[on/off] Setting toggle: off
-            set "debug_h2p_terse_msgs="
-        ) else                          ( echo/--debug:%~1:[on/off] Setting toggle: on
-            set "debug_h2p_grab_lnum=true"
-        )
-        goto :eof
-    ) else (
-        for %%u in (%_h2p_debug_states_true% ) do if /i "%~2" equ "%%~u"  set "debug_h2p_terse_msgs="
-        for %%u in (%_h2p_debug_states_false%) do if /i "%~2" equ "%%~u"  set "debug_h2p_terse_msgs=true"
-        goto :eof
-    )
-
-goto :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
