@@ -1,0 +1,9 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# force windows line endings on .bat .cmd files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# force windows line endings on specific files
+eph.u.conf text eol=crlf
