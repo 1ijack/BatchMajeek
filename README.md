@@ -37,6 +37,10 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - Adjusts to system timezone and DST (or any other time adjustments registered with windows)
   - Returns unixTime in Seconds OR milliseconds, option defined in 'user settings' inside the script
   - Auto calculates leap-year(s)
+  - Optimized for quick execution. Runs 30%-50% faster when all comments/empty lines  are removed 
+- [unixTimeFull.bat](./unixTimeFull.bat ) -- returns the current system time as unix time (01/01/1970 )
+  - Same as [unixTime.bat](./unixTime.bat ), but without the optimizations.
+  - Uses functions for further customization
 
 ## Other majeekal (and demoralizing) repos written by batchCraftsmen (or sorcerers)
 - [https://github.com/FrankWestlake/CMD-scripts](https://github.com/FrankWestlake/CMD-scripts) - a repo by Frank Westlake that turned [me](https://github.com/1ijack) into a jellyfish of despair
