@@ -186,8 +186,6 @@ rem    ghetto milliseconds ftw
     if /i "%utx_out_ms:~0,1%" neq "t" goto :eof
     if defined utx_elapsed{ms} call set "%~1=%%%~1%%%utx_elapsed{ms}%"
 
-    REM call :func_utx_dumps_var_states
-    REM ( for %%A in (  "utx_leap{total}";  "utx_leap{diff}";  "utx_p{tri}";  "utx_p{two}"  ) do set "%%~A=" ) 2>nul 1>nul
 goto :eof
 
 
