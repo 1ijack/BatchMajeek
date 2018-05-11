@@ -1,4 +1,4 @@
-::  by JaCk  |  Release 05/08/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/unixTimeFull.bat  |  unixTimeFull.bat  --  returns current time in unix time  --  total elapsed seconds since January 1st, 1970
+::  by JaCk  |  Release 05/11/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/unixTimeFull.bat  |  unixTimeFull.bat  --  returns current time in unix time  --  total elapsed seconds since January 1st, 1970
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -179,7 +179,7 @@ rem    ghetto milliseconds ftw
     if not defined utx_utc{shift} call :func_utx_get_utc_timeShift   "utx_utc{shift}"    "seconds"
     call :func_utx_calc_time_secs_ms   "utx_elapsed{secs}"   "utx_elapsed{ms}"   "%time%"
 
-    for /l %%A in (%utx_p{tri}:~-4%,1,%utx_p{two}:~-4%) do set /a "utx_leap{total}+=( utx_leap{diff}=%%A %% 4 & %%A %% 100 & %%A %% 400, ! utx_leap{diff} )"
+    for /l %%A in (%utx_p{tri}:~-4%,1,%utx_p{two}:~-4%) do set /a "utx_leap{total}+=!(%%A %% 4 & %%A %% 100 & %%A %% 400)"
 
     for /f "tokens=1-3,4-6 delims=-/" %%A in ("%utx_p{two}%/%utx_p{tri}%") do set /a "%~1=((((( 1%%~A - 1%%~D ) * 305 ) / 10 ) + ( 1%%~B - 1%%~E + %utx_leap{total}% ) + ( ( %%~C - %%~F ) * 365 ) ) * 86400 ) - 172800 + %utx_utc{shift}% + %utx_elapsed{secs}%"
 
