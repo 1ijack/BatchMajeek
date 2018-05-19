@@ -21,10 +21,13 @@
 ::                                   ::
 :::::::::::::::::::::::::::::::::::::::
 :func_sxp_user_settings
-    ::  ffmpeg binary path and options
+    ::  ffmpeg binary path and options, note, -v/-loglevel args are used manually
     set "sxp_ffmpeg_bin=%ProgramData%\chocolatey\bin\ffmpeg.exe"
-    set "sxp_ffmpeg_opt=-n -hide_banner -v info -vn -an"
+    set "sxp_ffmpeg_opt=-n -vn -an -hide_banner"
 
+    ::  Media file extensions, you can separate with whitespace, semicolon or comma
+    set "sxp_extensions=.avi .bik .flv .mk3d .mkv .mks .mov .mp4 .mpg .mpeg .ogm .ogv .webm .wmv"
+    
     REM set "sxp_skip_helps=true"
     set "sxp_skip_helps="
 goto :eof
@@ -77,8 +80,8 @@ goto :eof
 :func_sxp_main
     ::  clear any pop flags before starting export
     call :func_sxp_user_settings
-    call :func_sxp_error_check
-    call :func_sxp_outdir
+    call :func_sxp_outdir "si"
+    call :func_sxp_error_check    || goto :func_sxp_gtfo
 
     ::  use params as input path OR use the current directory path
     if  "%~1" equ "" (
@@ -111,8 +114,11 @@ goto :eof
 
     echo/|set /p "dummy=Info: CreateDir: Creating Dir: %~1 "
     md "%~1"
-
-    if "%errorlevel%" neq "0" if not exist "%~1" echo Error: CreateDir: Unable to Create: "%~1"
+    
+    if "%errorlevel%" neq "0" if not exist "%~1" (
+        echo Error: CreateDir: Unable to Create: "%~1"
+    ) else echo/Success
+    if "%~2" neq "" ( ( shift /1 ) & goto %~0 )
 goto :eof
 
 
@@ -135,7 +141,14 @@ rem  Mainly checks for ffmpeg binary
     ::  well, last try, check path for ffmpeg.exe binary, selects the first one
     if not defined sxp_ffmpeg_bin for /f "delims=" %%W in ('""%SystemRoot%\System32\where.exe" "ffmpeg""') do if not defined sxp_ffmpeg_bin set "sxp_ffmpeg_bin=%%~W"
 
-    :: good-bye moon-men
+    ::  create extension list filter, prefix \ and postfix $ to look like \.ext$
+    set "sxp_ext_filter="
+    if defined sxp_extensions for %%A in ( %sxp_extensions% ) do call set "sxp_ext_filter=%%sxp_ext_filter%%%%%%~xA "
+    if not defined sxp_extensions set "sxp_ext_filter=\.mkv$ \.mp4$"
+    set "sxp_ext_filter=%sxp_ext_filter:.=\.%"
+    set "sxp_ext_filter=%sxp_ext_filter: =$ %"
+    
+    :: goooooooooood-byeeeeeee moon-men
     if defined sxp_ffmpeg_bin exit /b 0
 
     echo/%~nx0: Error: Init: Unable to proceed, ffmpeg binary cannot be located and variable ^(sxp_ffmpeg_bin^) is undefined/misdefined
@@ -182,86 +195,65 @@ rem  When param1, pops back all tracked pushes
         set /a "sxp_popd_me_back-=1"
         popd
     )
-    if "%sxp_popd_me_back%" equ "0" set "xp_popd_me_back="
+    if "%sxp_popd_me_back%" equ "0" set "sxp_popd_me_back="
 goto :eof
 
 
 
 :func_sxp_subExport
     if "%~1" equ "" goto :eof
-    if not exist "%~1\*.mkv" goto :eof
+    if not exist "%~1\*" goto :eof
 
     echo/%~nx0: Info: %~0: Checking: "%~1"
+    echo/%~nx0: Info: %~0: findstr file filter: "%sxp_ext_filter%"
 
-    if not exist "%~1\subs\" call :func_sxp_create_dir "%~1\subs\"
+    REM if not exist "%~1\subs\" call :func_sxp_create_dir "%~1\subs\"
+    REM call :func_sxp_indir "%~1\subs\"
 
-    call :func_sxp_indir "%~1\subs\"
-
-    rem  reads the language tags and creates subs based for those languages
-    rem  only dump attachments, fonts/etc, when there are no subs created for that specific file yet
-    for /f "delims=" %%Z in ('dir /s /b /a:-d "%~1\*.mkv"') do for /f "usebackq tokens=1-7 delims=(#) " %%A in (`
-        "("%sxp_ffmpeg_bin%" -hide_banner -vn -an -i "%%~Z" -) 2>&1"
-    `) do if "%%~A" equ "Stream" if "%%~E" equ "Subtitle:" if "%%~C" neq "" if "%%~C" neq "Subtitle:" (
-        if not exist "%%~nxZ.%%~C.ass" (
-            if not exist "%%~nxZ.%%~C.srt" (
-                if not exist "%%~nxZ.%%~C.vtt" ( 
-                    echo/%~nx0: Info: %~0: Export %%~C .srt;.ass;.vtt: "%%~nxZ"
-                    ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -dump_attachment:t "" -i "%%~Z"
-                    ) 2>nul
-                    ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.%%~C.ass" -map %%~B "%%~nxZ.%%~C.srt" -map %%~B "%%~nxZ.%%~C.vtt"
-                    ) 2>> "%~1\meta\subs.error.%%~nxZ.%%~C.log" 1>> "%~1\meta\subs.export.%%~nxZ.%%~C.log"
-                )
-            ) else if not exist "%%~nxZ.%%~C.vtt" ( 
-                echo/%~nx0: Info: %~0: Export %%~C .vtt: "%%~nxZ"
-                ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.%%~C.vtt"
-                ) 2>> "%~1\meta\subs.error.%%~nxZ.%%~C.log" 1>> "%~1\meta\subs.export.%%~nxZ.%%~C.log"
-            )
-        ) else (
-            if not exist "%%~nxZ.%%~C.srt" ( 
-                echo/%~nx0: Info: %~0: Export %%~C .srt: "%%~nxZ"
-                ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.%%~C.srt"
-                ) 2>> "%~1\meta\subs.error.%%~nxZ.%%~C.log" 1>> "%~1\meta\subs.export.%%~nxZ.%%~C.log"
-            )
-            if not exist "%%~nxZ.%%~C.vtt" ( 
-                echo/%~nx0: Info: %~0: Export %%~C .vtt: "%%~nxZ"
-                ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.%%~C.vtt"
-                ) 2>> "%~1\meta\subs.error.%%~nxZ.%%~C.log" 1>> "%~1\meta\subs.export.%%~nxZ.%%~C.log"
-            )
+    rem  recursively walk down the directory tree searching for files to process
+    rem    reads the language tags and creates subs based for those languages
+    rem    when no language tag found, uses und aka undefined as the identifier
+    rem    only dump attachments, fonts/etc, when there are no subs created for that specific file yet
+    for /f "delims=" %%Z in ('"( dir /s /b /a:-d "%~1" | findstr /ir "%sxp_ext_filter%" ) 2>nul"') do (
+        for /f "delims=" %%Q in ('cd') do if "%%~Q" neq "%%~dpZsubs" (
+            call :func_sxp_create_dir "%%~dpZsubs\" "%%~dpZmeta\"
+            call :func_sxp_outdir
+            call :func_sxp_indir "%%~dpZsubs\" 
         )
-    ) else for /f "tokens=1,2 delims=:" %%K in ("%%B") do (
-        if not exist "%%~nxZ.und.%%~K%%~L.ass" (
-            if not exist "%%~nxZ.und.%%~K%%~L.srt" (
-                if not exist "%%~nxZ.und.%%~K%%~L.vtt" ( 
-                    echo/%~nx0: Info: %~0: Export und.%%~K%%~L .srt;.ass;.vtt: "%%~nxZ"
-                    ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -dump_attachment:t "" -i "%%~Z"
-                    ) 2>nul
-                    ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.und.%%~K%%~L.ass" -map %%~B "%%~nxZ.und.%%~K%%~L.srt" -map %%~B "%%~nxZ.und.%%~K%%~L.vtt"
-                    ) 2>> "%~1\meta\subs.error.%%~nxZ.und.%%~K%%~L.log" 1>> "%~1\meta\subs.export.%%~nxZ.und.%%~K%%~L.log"
-                )
-            ) else if not exist "%%~nxZ.und.%%~K%%~L.vtt" ( 
-                echo/%~nx0: Info: %~0: Export und.%%~K%%~L .vtt: "%%~nxZ"
-                ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.und.%%~K%%~L.vtt"
-                ) 2>> "%~1\meta\subs.error.%%~nxZ.und.%%~K%%~L.log" 1>> "%~1\meta\subs.export.%%~nxZ.und.%%~K%%~L.log"
+
+        for /f "usebackq tokens=1-7 delims=(#) " %%A in (`
+            "("%sxp_ffmpeg_bin%" -v info -vn -an -hide_banner -i "%%~Z" -) 2>&1 | "%SystemRoot%\System32\findstr.exe" /c:"Subtitle:""
+        `) do if /i "%%~xZ" neq ".ass"  if /i "%%~xZ" neq ".srt"  if /i "%%~xZ" neq ".vtt" if "%%~A" equ "Stream" if "%%~C" neq "" for /f "tokens=1,2 delims=:" %%K in ("%%B") do if "%%~C" neq "Subtitle:" (
+            if not exist "%%~nxZ.%%C.%%K%%L.ass" if not exist "%%~nxZ.%%C.%%K%%L.srt" if not exist "%%~nxZ.%%C.%%K%%L.vtt" ( 
+                echo/%~nx0: Info: %~0: "%%~nxZ" attachments
+                "%sxp_ffmpeg_bin%" -v quiet %sxp_ffmpeg_opt% -dump_attachment:t "" -i "%%~Z"
+                echo/%~nx0: Info: %~0: "%%~nxZ.%%C.%%K%%L.ass"
+                echo/%~nx0: Info: %~0: "%%~nxZ.%%C.%%K%%L.srt"
+                echo/%~nx0: Info: %~0: "%%~nxZ.%%C.%%K%%L.vtt"
+                ( "%sxp_ffmpeg_bin%" -v error %sxp_ffmpeg_opt% -i "%%~Z" -map %%B "%%~nxZ.%%C.%%K%%L.ass" -map %%B "%%~nxZ.%%C.%%K%%L.srt" -map %%B "%%~nxZ.%%C.%%K%%L.vtt"
+                ) 2>> "%%~dpZmeta\subs.error.%%~nxZ.%%C.%%K%%L.log" 1>> "%%~dpZmeta\subs.%%~nxZ.%%C.%%K%%L.log"
+                (   for /f "delims=" %%Q in ("%%~dpZmeta\subs.error.%%~nxZ.%%C.%%K%%L.log") do if "%%~zQ" equ "0" del /q "%%~Q"
+                    for /f "delims=" %%Q in ("%%~dpZmeta\subs.info.%%~nxZ.%%C.%%K%%L.log" ) do if "%%~zQ" equ "0" del /q "%%~Q"
+                ) 2>nul
             )
         ) else (
-            if not exist "%%~nxZ.und.%%~K%%~L.srt" ( 
-                echo/%~nx0: Info: %~0: Export und.%%~K%%~L .srt: "%%~nxZ"
-                ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.und.%%~K%%~L.srt"
-                ) 2>> "%~1\meta\subs.error.%%~nxZ.und.%%~K%%~L.log" 1>> "%~1\meta\subs.export.%%~nxZ.und.%%~K%%~L.log"
-            )
-            if not exist "%%~nxZ.und.%%~K%%~L.vtt" ( 
-                echo/%~nx0: Info: %~0: Export und.%%~K%%~L .vtt: "%%~nxZ"
-                ( "%sxp_ffmpeg_bin%" %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.und.%%~K%%~L.vtt"
-                ) 2>> "%~1\meta\subs.error.%%~nxZ.und.%%~K%%~L.log" 1>> "%~1\meta\subs.export.%%~nxZ.und.%%~K%%~L.log"
+            if not exist "%%~nxZ.und.%%~K%%~L.ass" if not exist "%%~nxZ.und.%%~K%%~L.srt" if not exist "%%~nxZ.und.%%~K%%~L.vtt" (
+                echo/%~nx0: Info: %~0: "%%~nxZ" attachments
+                "%sxp_ffmpeg_bin%" -v quiet %sxp_ffmpeg_opt% -dump_attachment:t "" -i "%%~Z"
+                echo/%~nx0: Info: %~0: "%%~nxZ.und.%%~K%%~L.ass"
+                echo/%~nx0: Info: %~0: "%%~nxZ.und.%%~K%%~L.srt"
+                echo/%~nx0: Info: %~0: "%%~nxZ.und.%%~K%%~L.vtt"
+                ( "%sxp_ffmpeg_bin%" -v error %sxp_ffmpeg_opt% -i "%%~Z" -map %%~B "%%~nxZ.und.%%K%%L.ass" -map %%~B "%%~nxZ.und.%%K%%L.srt" -map %%~B "%%~nxZ.und.%%K%%L.vtt"
+                ) 2>> "%%~dpZmeta\subs.error.%%~nxZ.und.%%K%%L.log" 1>> "%%~dpZmeta\subs.info.%%~nxZ.und.%%K%%L.log"
+                (   for /f "delims=" %%Q in ("%%~dpZmeta\subs.error.%%~nxZ.und.%%K%%L.log") do if "%%~zQ" equ "0" del /q "%%~Q"
+                    for /f "delims=" %%Q in ("%%~dpZmeta\subs.info.%%~nxZ.und.%%K%%L.log" ) do if "%%~zQ" equ "0" del /q "%%~Q"
+                ) 2>nul
             )
         )
     )
-
-    
     rem  removing all empty subtitle files
-    ( 
-        for /f "delims=" %%Z in ('
-            dir /s /b /a:-d "%~1\subs\*.srt" "%~1\subs\*.ass" "%~1\subs\*.vtt" 
+    for %%X in (.srt;.ass;.vtt) do ( for /f "delims=" %%Z in ('
+            dir /s /b /a:-d "%~1\subs\*%%X"
         ') do if "%%~zZ" equ "0" (
             echo/%~nx0: Info: %~0: Empty Cleanup: "%%~nxZ"
             del /q "%%~Z"
