@@ -23,7 +23,7 @@
 :func_sxp_user_settings
     ::  ffmpeg binary path and options
     set "sxp_ffmpeg_bin=%ProgramData%\chocolatey\bin\ffmpeg.exe"
-    set "sxp_ffmpeg_opt=%ProgramData%\chocolatey\bin\ffmpeg.exe -n -hide_banner -v info -vn -an"
+    set "sxp_ffmpeg_opt=-n -hide_banner -v info -vn -an"
 
     REM set "sxp_skip_helps=true"
     set "sxp_skip_helps="
