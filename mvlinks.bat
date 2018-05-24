@@ -1,4 +1,4 @@
-::  by JaCk  |  Release 10/05/2017  |  https://github.com/1ijack/BatchMajeek/blob/master/mvlinks.bat  | mvlinks.bat -- uses sysinternals findlinks.exe to recursively dump linkcount and links from a root directory and then move entire structure to another root source directory.  Should handle almost all filenames thrown at it.
+::  by JaCk  |  DevRelease 05/23/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/mvlinks.bat  | mvlinks.bat -- uses sysinternals findlinks.exe or windows fsutil.exe to recursively dump linkcount and links from a root directory and then move entire structure to another root source directory.  Should handle almost all filenames thrown at it.
 ::::::::::  ::::  ::::  ::::  :::::::::
 @echo off & setlocal DisableDelayedExpansion EnableExtensions & ( (for /f "tokens=1 delims==" %%V in ('set mlk_') do set "%%V=") 2>nul 1>nul )
 
@@ -14,10 +14,9 @@ rem findlinks binary, add a path if it's not in %path% or %cd%
  set "mk_fln_bin=%ProgramData%\chocolatey\bin\FindLinks.exe"
  REM set "mk_fln_bin="
 
-rem  Soon to be obsolete and removed...
-    rem Filters for file types.  findstr syntax is OK  -- Currently Ignored
-     REM set "mlk_filter_accepted_extensions=.avi$ .mkv$ .mpg$ .mpeg$ .webm$ .mp4$ .ogm$ .mov$ .flv$ .bik$"
-     REM set "mlk_filter_ignore_list=.\-.Manga. .\-.Sound. Relation. .\\meta\\."
+rem fsutil binary, add a path if it's not in %path% or %cd%
+ set "mk_fsu_bin=%SystemRoot%\System32\fsutil.exe"
+ REM set "mk_fsu_bin="
 :::::::::::::::::::::::::::::::::::::::
 
 
@@ -28,12 +27,19 @@ rem Type: bool: [true/undef] -- When set to true, script moves unlinked files as
 
 rem Type: int: [0/1/etc] -- Internal Counter, do not modify unless you know what you're doing -- Count X links for the original file? When defined as "1", the lowest number of links would be 0, then 2.
  set "mlk_filesrc_as_link=1"
+
+rem  Type: String: [<	>] -- tab character.  This character is used further in the script as a string delimiter for findlinks
+set "mlk_tab_char=	"
+
+rem  Type: bool: [true/undef] -- force 'fsutil.exe' instead of 'findlinks.exe'-- regardless of the existence of the 'findlinks.exe' binary.  Note, 'fsutil.exe' must exist somewhere in the path or correctly defined path in variable 'mk_fsu_bin'
+ set "mk_bool_fsutil_force=true"
 :::::::::::::::::::::::::::::::::::::::
 
 ::: Init - Check n Check :::  Run Main  ::: Deinit -- clean up and leave
 call :func_mlk_init
 if "%errorlevel%" neq "0" ( ( echo/Error: Generic: Too Lazy to print details) & goto :eof )
 call :func_mlk_get_and_process_links "%mlk_root_dirtree_src%"
+call :func_mlk_check_hidden_paths    "%mlk_root_dirtree_new%"
 call :func_mlk_uninit
 if "%~1%~2%~3" equ "" timeout /t 25
 goto :eof
@@ -81,21 +87,39 @@ rem  Basic script requirements/dependencies check
     ( for /f "eol= tokens=1 delims=" %%A in ('mklink /?') do if /i "%%~A" equ "Creates a symbolic link." set "mklink_cmd=true"
     ) 2>nul 1>nul 
   
-    if "%mklink_cmd%" neq "true" exit /b 1
-    
-    REM ( mklink /? 
-    REM ) | "%SystemRoot%\System32\findstr.exe" /r "\<Creates[^a-z0-9]a[^a-z0-9]symbolic.link\.\>" 2>nul 1>nul 
-    REM if not 1%errorlevel% equ 10 exit /b 1
-  
-    if not defined mk_fln_bin ( for /f "delims=" %%F in ('"%SystemRoot%\System32\where.exe" findlinks.exe') do set "mk_fln_bin=%%~A"
+
+    rem  fsutil resolution
+    if not defined mk_fsu_bin ( for /f "delims=" %%F in ('"%SystemRoot%\System32\where.exe" fsutil.exe   ') do if not defined mk_fsu_bin set "mk_fsu_bin=%%~A"
     ) 2>nul 1>nul
-    if not defined mk_fln_bin ( 
-        echo/Error: Fatal: Unable to locate "findlinks.exe" or variable "mk_fln_bin" is undefined/incorrect.
-        echo/Error: Fatal: Please make sure "%~0" can see "findlinks.exe"
-    ) 1>&2
-    if not exist "%mk_fln_bin%" exit /b 1
     
-  
+    rem  findlinks resolution
+    if not defined mk_fln_bin ( for /f "delims=" %%F in ('"%SystemRoot%\System32\where.exe" findlinks.exe') do if not defined mk_fln_bin set "mk_fln_bin=%%~A"
+    ) 2>nul 1>nul
+
+    rem  red ink
+    if not defined mk_fln_bin if not defined mk_fsu_bin (
+        echo/Error: Fatal: Unable to locate  "fsutil.exe"  and  variable "mk_fsu_bin" is undefined/incorrect.
+        echo/Error: Fatal: Unable to locate "findlinks.exe" and variable "mk_fln_bin" is undefined/incorrect.
+        echo/Error: Fatal: Please make sure "%~0" can see "fsutil.exe" or "findlinks.exe"
+    ) 1>&2
+    if "%mklink_cmd%" neq "true" (
+        echo/Error: Fatal: unusable command 'mklink'... missing help text: "Creates a symbolic link." 
+    ) 1>&2
+
+    if "%mklink_cmd%" neq "true" exit /b 1
+    set "mk_use_fln="
+    set "mk_use_fsu="
+    
+    rem  which binary to use 'findlinks' or 'fsutil'
+    if defined mk_bool_fsutil_force (
+        set "mk_use_fsu=true"
+    ) else if exist "%mk_fln_bin%" (
+        set "mk_use_fln=true"
+    ) else if exist "%mk_fsu_bin%" (
+        set "mk_use_fsu=true"
+    ) else exit /b 1
+
+    rem  When no errors encountered, check/prompt for paths
     if not defined mlk_root_dirtree_src call :func_mlk_define_path  mlk_root_dirtree_src   "%~1"  "&echo/Input: Original Directory Tree"  "%cd%"
     if not defined mlk_root_dirtree_new call :func_mlk_define_path  mlk_root_dirtree_new   "%~2"  "&echo/Hint: Enter New Drive Letter:&echo/&echo/Input: New-Root: Directory/Drive" "N:"
 
@@ -120,14 +144,7 @@ rem  A shifter way to cycle through paths
     
 goto :eof
 
-::: Main - get links and move files
-::
-rem Recurse down a tree source with filters
-REM archive1 -- 'dir /s /b /o /a:-h /a:-d "%mlk_root_dirtree_src%" ^| findstr /v /i "%mlk_filter_ignore_list%" ^| findstr /i "%mlk_filter_accepted_extensions%"'
-REM archive2 -- call :func_mlk_get_and_process_links   "%mlk_root_dirtree_src%"
 
-::  Usage  ::  func_mlk_subprocess  pathTo
-:::::::::::::::::::::::::::::::::::::::
 
 ::  Usage  ::  func_mlk_uninit 
 rem  Unsets env changes
@@ -151,7 +168,7 @@ rem    1 -- Path Inaccessible or Does not exist
     if "%~1" neq "" set "%~1=true"
     
     if "%~a2" neq "" exit /b 0
-    if exist "%~2" exit /b 0
+    if exist "%~2"   exit /b 0
     for /f "tokens=1" %%Q in ('
         %SystemRoot%\System32\attrib.exe "%~2"
     ') do if "%%~Q" neq "" goto :eof
@@ -163,7 +180,6 @@ rem    1 -- Path Inaccessible or Does not exist
     if "%~3" neq "" exit /b 1
     
     1>&2 echo/ Error: Check Path: Unable to locate "%~2"
-    
     exit /b 1
 
 goto :eof
@@ -183,7 +199,6 @@ rem    optionalPromptMsg -- When needed to promp user, Use this text
 
     if defined %~1 call :func_mlk_check_path "" "%%%~1%%"
     if defined %~1 ( ( call echo "%%%~1%%" ) & goto :eof )
-    REM pause
     
     if "%~3" neq "" call :func_mlk_get_user_input "%~1"         "%~3"            "%~4"
     if "%~3" equ "" call :func_mlk_get_user_input "%~1"   "Input: Path of %~1"   "%~4"
@@ -196,61 +211,80 @@ goto :eof
 rem  Process all objects found in directory tree
 :func_mlk_get_and_process_links
     if "%~1" equ "" goto :eof
+
+    if defined mk_use_fsu set "mlk_subr_link_process=:subr_mlk_links_process_fsutil"
+    if defined mk_use_fln set "mlk_subr_link_process=:subr_mlk_links_process_findlinks"
     
+    pushd "%~1"
     for /f "tokens=* delims=" %%F in (
-        'dir /s /b /o /a:-d "%~1"'
-    ) do if "%%~nF" neq "" call :subr_mlk_links_process_findlinks "%%~F"
+        'dir /s /b /o /a "%~1"'
+    ) do if "%%~nxF" neq "" call %mlk_subr_link_process%    "%%~F"
+    popd
 
 goto :eof
 
 
-    :: Usage :: subr_mlk_links_process_findlinks    "Path"
+    :: Usage :: subr_mlk_links_process_fsutil    "Path"
     rem  Processes Object: unhides, Moves, removes, relinks, rehides objects from one dirtree to another
     rem  
     :subr_mlk_links_process_fsutil
         if "%~1" equ "" goto :eof
-        
         call :func_mlk_unhide "%~1"
-        
-        if not defined mlk_bool_mv_type_all for /f "tokens=2 delims=: " %%L in (
-            'findlinks -nobanner "%~1" ^| findstr /i /C:"Links:"'
-        ) do for %%l in ( 
-            %%~L 
-        ) do if 9%%~l gtr 90 call :func_mlk_floop_add_one   "%~1"  "%%~l"
-        if not defined mlk_bool_mv_type_all goto :eof
 
+        rem  ignore processing directories
+        set "mlk_pvar{One{attrib}}=%~a1"
+        if /i "%mlk_pvar{One{attrib}}:~0,1%" equ "d" ( ( set "mlk_pvar{One{attrib}}=" ) & goto :eof )
+
+        rem  match the link count to findlinks LINKCOUNT output
+        set "mlk_process_file{count}=-1"
         
-        for /f "tokens=2 delims=: " %%L in (
-            'findlinks -nobanner "%~1" ^| findstr /i /C:"Links:"'
-        ) do for %%l in ( 
-            %%~L 
-        ) do call :func_mlk_floop_add_one   "%~1" "%%~l"
-        
-        rem get hardlink
-        for /F "usebackq tokens=2* delims=:" %%L in (
-            `"%SystemRoot%\System32\fsutil.exe" hardlink list "%~1"`
-        ) do "%SystemRoot%\System32\fsutil.exe" hardlink list "%%~L"
-        
-        
+        rem  get hardlink count
+        for /F "delims=" %%L in ('
+            call "%mk_fsu_bin%" hardlink list "%~1"
+        ') do set /a "mlk_process_file{count}+=1"
+
+        rem  get a count of how many files have been processed
+        set /a "mlk_object{counter}+=1"
+
+        rem  forced to move ONLY hardlinked files, otherwise leave function when link count is 0
+        if not defined mlk_bool_mv_type_all if "%mlk_process_file{count}%" equ "0" ( ( set "mlk_process_file{count}=" ) & goto :eof )
+
+        rem  get/process hardlink files 
+        for /F "delims=" %%L in ('
+            call "%mk_fsu_bin%" hardlink list "%~1"
+        ') do if exist "%~d1%%~L" call :func_mlk_floop_add_one   "%~d1%%~L"  "%mlk_process_file{count}%"  "%mlk_object{counter}%"
+
+        if "%mlk_fvar{current_count}%" neq "" (
+        REM echo/^|    \
+        REM echo/^|_______________________________________
+            echo/│    ▀
+            echo/╘═══════════════════════════════════════
+        )
+
+        set "mlk_process_file{count}="
+
     goto :eof
 
     
-"%SystemRoot%\System32\fsutil.exe" hardlink list "%~1" | findstr /n .* | findstr /b /v 1
-
-
     :: Usage :: subr_mlk_links_process_findlinks    "Path"
     rem  Processes Object: unhides, Moves, removes, relinks, rehides objects from one dirtree to another
     rem  
     :subr_mlk_links_process_findlinks
         if "%~1" equ "" goto :eof
-        
         call :func_mlk_unhide "%~1"
+
+        rem  ignore processing directories
+        set "mlk_pvar{One{attrib}}=%~a1"
+        if /i "%mlk_pvar{One{attrib}}:~0,1%" equ "d" ( ( set "mlk_pvar{One{attrib}}=" ) & goto :eof )
         
+        rem  get a count of how many files have been processed
+        set /a "mlk_object{counter}+=1"
+
         if not defined mlk_bool_mv_type_all for /f "tokens=2 delims=: " %%L in (
             'findlinks -nobanner "%~1" ^| findstr /i /C:"Links:"'
         ) do for %%l in ( 
             %%~L 
-        ) do if %%~l. gtr 0. call :func_mlk_floop_add_one   "%~1"  "%%~l"
+        ) do if %%~l. gtr 0. call :func_mlk_floop_add_one   "%~1"  "%%~l"  "%mlk_object{counter}%"
         if not defined mlk_bool_mv_type_all goto :eof
 
         
@@ -258,36 +292,71 @@ goto :eof
             'findlinks -nobanner "%~1" ^| findstr /i /C:"Links:"'
         ) do for %%l in ( 
             %%~L 
-        ) do call :func_mlk_floop_add_one   "%~1" "%%~l"
+        ) do call :func_mlk_floop_add_one   "%~1" "%%~l"  "%mlk_object{counter}%"
 
-        
+        if "%mlk_fvar{current_count}%" neq "" (
+        REM echo/^|    ^^
+        REM echo/^|_______________________________________
+            echo/│    ▀
+            echo/╘═══════════════════════════════════════
+        )
     goto :eof
 
 
-    :: Usage :: func_mlk_floop_add_one  Path\File.Extension    TotalCount   
+    :: Usage :: func_mlk_floop_add_one  Path\File.Extension    TotalCount   CurrentCount
     rem  Processing the "self/main/source" file counter (mlk_filesrc_as_link)
     rem    Note: func exists mainly to circumvent delayed expansion
     rem    when var "mlk_filesrc_as_link" is undef in settings ("Script internal settings" Section), defaults to 0 ("Init" Section)
+    rem    CurrentCount is the current unique file count, when it changes, function prints new table.
     :func_mlk_floop_add_one
         if "%~1" equ "" goto :eof
-        
+
         set "mlk__lcnt=0"
         if "%~2" neq "" set /a "mlk__lcnt+=%~2"
         if defined mlk_filesrc_as_link set /a "mlk__lcnt+=%mlk_filesrc_as_link%"
 
-        
-        echo/-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
+        rem  Making sure that header text is printed once per linked file
+        if "%~3" neq "" if "%~3" equ "%mlk_fvar{current_count}%" call :func_mlk_floop_cnt_vs_var  "%~1"  "%mlk_root_dirtree_new%%~pnx1"  "%mlk_root_dirtree_new%"
+        if "%~3" neq "" if "%~3" equ "%mlk_fvar{current_count}%" goto :eof
+
+        if "%~3" neq "" set "mlk_fvar{current_count}=%~3"
         echo/
-        echo/       Moving Source DirTree
-        if 1%mlk__lcnt% leq 11 echo/ "%~nx1";
-        if 1%mlk__lcnt% gtr 11 echo/ Links: %mlk__lcnt%;   "%~nx1";
+    REM echo/     "%~nx1" : {
+    REM echo/         "full path"  : "%~dpnx1",
+    REM echo/         "date time"  : "%~t1",
+REM if defined mlk__HVar (
+REM     echo/         "attributes" : "%mlk__HVar%",
+REM ) else (
+REM     echo/         "attributes" : "%~a1",
+REM )
+    REM echo/         "byte count" : "%~z1",
+    REM echo/         "link count" : "%mlk__lcnt%"
+    REM echo/     }
+    REM echo/ _______________________________________
+    REM echo/^|
+    REM echo/^|  "%~nx1"
+    REM echo/^|    ^|--\
+    REM echo/^|       \-- "full path"  : "%~dpnx1"
+    REM echo/^|       \-- "date time"  : "%~t1"
+    REM echo/^|       \-- "attributes" : "%~a1"
+    REM echo/^|       \-- "byte count" : "%~z1"
+    REM echo/^|       \-- "link count" : "%mlk__lcnt%"        echo/^|  "%~nx1"
+        echo/╒═══════════════════════════════════════
+        echo/│
+        echo/│  "%~nx1"
+        echo/│    ├─┬─» "full path"  : "%~dpnx1"
+        echo/│    │ ├─» "date time"  : "%~t1"
+
+    if defined mlk__HVar (
+        echo/│    │ ├─» "attributes" : "%mlk__HVar%"
+    ) else (
+        echo/│    │ ├─» "attributes" : "%~a1"
+    )
+        echo/│    │ ├─» "byte count" : "%~z1"
+        echo/│    │ └─» "link count" : "%mlk__lcnt%"
         call :func_mlk_floop_cnt_vs_var  "%~1"  "%mlk_root_dirtree_new%%~pnx1"  "%mlk_root_dirtree_new%"
-        echo/
-        echo/-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
-        echo/
 
     goto :eof
-
 
     
 :: Usage :: func_mlk_process_booleans   returBoolVar   setTestValue-Optional
@@ -317,37 +386,45 @@ rem    func  flag_disable_state
     set "mlk__BoP="
 
 goto :eof
-    rem Replaced block below with for loop - not sure why I didn't do that in the first place....
-    rem 
-    REM    if "%mlk__BoP:~0,1%" equ "1" set "mlk__BoP=" & goto :eof
-    REM if /i "%mlk__BoP:~0,1%" equ "y" set "mlk__BoP=" & goto :eof
-    REM if /i "%mlk__BoP:~0,1%" equ "p" set "mlk__BoP=" & goto :eof
-    REM if /i "%mlk__BoP:~0,1%" equ "a" set "mlk__BoP=" & goto :eof 
-    REM if /i "%mlk__BoP:~0,1%" equ "t" set "mlk__BoP=" & goto :eof
     
 
 
 :: Usage :: func_mlk_floop_mv_fpath   OriginalFilePath   NewFilePath
 :func_mlk_floop_mv_fpath
-    if "%~1" equ "" exit /b 1
     if "%~2" equ "" exit /b 1
+    if "%~1" equ "" exit /b 1
 
     if exist "%~2" exit /b 101
 
-    ( move "%~1" "%~2"
-    ) 1>nul 
+REM echo/|set /p "blank=│    Moving ├───» "%~2""
+REM echo/|set /p "blank=│    ├─■  Moving  ■─ "%~2""
+    echo/|set /p "blank=│    ├─◘ Move to  ◘─ "%~2"        "
 
-    if not exist "%~2" (
-        echo/ Error: Move Failed, file not found: "%~2"
+    
+    for /f "tokens=1,2,*" %%A in ('2^>^&1 move "%~1" "%~2"') do if "%%~C" equ "moved." (
+    REM echo/│    │ └─▌ %%~C
+    REM echo/%%~C
+        echo/[success]
+    ) else if not exist "%~2" (
+    REM echo/Error.
+        echo/[error]
+        echo/│    │ └─▌ Error: %%~A %%~B %%~C
+        echo/│    │   └─■ Error: Move Failed, file not found
         exit /b 1
     ) 1>&2 
-    
-    echo/  Moved    -- "%~2"
+
+    REM echo/  Moved    -- "%~2"
     if not defined mlk__HVar goto :eof
     
-    echo/  Rehiding -- "%~2"
+    echo/|set /p "blank=│    ├─◘   hide   ◘─ "%~2"        "
     call :func_mlk_hide "%~2"
-    
+    if "%errorlevel%" equ "0" (
+        echo/[success]
+        REM echo/│    │ └─■ Done.
+    ) else (
+        echo/[error]
+        REM echo/│    │ └─■ Error: Unable to ReHide file
+    )
 goto :eof
 
 
@@ -380,39 +457,42 @@ rem      func_mlk_def_varpar   "C:\tools\bin\md5.cmd"   "C:\Users\Loser1\dropbox
     if "%~2" equ "" exit /b 1
     if "%~1" equ "" exit /b 1
     
+    
     if exist "%~3" (
-        echo/ Error: Cannot create link, destination file already exists
-        echo/ Error: Destination file: "%~3" 
+        echo/│    │ ├─■ Error: Cannot create link, destination file already exists
+        echo/│    │ └─■ Error: Destination file: "%~3" 
         exit /b 1
     ) 1>&2 
-    
+
     if "%~d1" neq "%~d3" (
-        echo/ Error: Cannot create link, destination file must be on the same drive as source file
-        echo/ Error: Destination file: "%~d3" 
-        echo/ Error:   Source    file: "%~d1" 
+        echo/│    │ └─▌ Error: Cannot create link, destination file must be on the same drive as source file
+        echo/│    │   ├─■ Error: Destination file: "%~d3" 
+        echo/│    │   └─■ Error:   Source    file: "%~d1" 
         exit /b 1
     ) 1>&2 
     
     if not exist "%~dp3" mkdir "%~dp3"
-    
+
+    echo/|set /p "blank=│    ├─◘   link   ◘─ "%~3"        "
+
     ( mklink /H "%~3" "%~1"
     ) 2>nul 1>nul
+
     if not exist "%~3" (
-        echo/ Error: Linking files 
-        echo/  Info: Destination file: "%~3" 
-        echo/  Info:   Source    file: "%~1" 
-        echo/  Info: Command: 
-        echo/    mklink /H "%~3" "%~1"
+        echo/[error]
+        echo/│    │ └─▌ Error: Linking files 
+        echo/│    │   ├─■ Info: Destination file: "%~3" 
+        echo/│    │   ├─■ Info:   Source    file: "%~1" 
+        echo/│    │   ├─■   Info: Command: 
+        echo/│    │   └─■   mklink /H "%~3" "%~1"
         exit /b 1
-    ) 1>&2 
-    
-    echo/  ReLinked -- "%~3"
+    ) 1>&2 else (
+        echo/[success]
+    )
 
     if exist "%~3" del /q "%~2"
 
 goto :eof
-    REM 2>nul 1>nul findstr /r "[<][<][=][=][=][>][>]"
-
 
 
 :: Usage :: func_mlk_floop_cnt_vs_var   Path\File.Extension     NewFilePath-Optional    NewRootPath-Optional    
@@ -429,37 +509,64 @@ rem             -- "C:\Users\Loser1\scripts\md5.bat"
 rem             -- "C:\Users\Loser1\dropbox\backup\batch\PsMd5.cmd"
 :func_mlk_floop_cnt_vs_var
     if "%~1" equ "" exit /b 101
-    
-    if "%~3" equ "" if defined mlk_root_dirtree_new call :nc_mlk_floop_cnt_vs_var "%~1"   "%~2"   "%mlk_root_dirtree_new%"   
-    if "%~3" equ "" goto :eof
-    if not exist "%~3" (
-        echo/Error: Source Path Not found: "%~3"
-        exit /b 1
-    )
-    
-    if "%~2" equ "" if defined mlk_root_dirtree_new call :nc_mlk_floop_cnt_vs_var "%~1"   "%~dp2%~pnx1"   "%~3"
+
+    rem  default reloop -- missing param2 
+    if defined mlk_root_dirtree_new if "%~2" equ "" call %~0   "%~1"   "%~dp2%~pnx1"   "%~3"
     if "%~2" equ "" goto :eof
+    
+    rem  default reloop -- missing param3
+    if defined mlk_root_dirtree_new if "%~3" equ "" call %~0   "%~1"       "%~2"       "%mlk_root_dirtree_new%"   
+    if "%~3" equ "" goto :eof
+
+    if not exist "%~3" (
+        echo/  Error: Source Path Not found: "%~3"
+        exit /b 1
+    ) 1>&2
 
     if not exist "%~dp2" (
-        echo/Info: Creating Dir "%~dp2" 
-        mkdir "%~dp2"
+        echo/|set /p "blank=│    ├─◘ Make dir ◘─ "%~dp2"        "
+        ( mkdir "%~dp2" 
+        ) && echo/[success]
     )
-
-    rem  dir /b /s /a:-d "%~1"
-    for /f "tokens=1* delims=" %%N in ('
-        findlinks -nobanner "%~1"
-    ') do if "%%~aN" neq "" (
-        if not exist "%~2" (
-            call :func_mlk_floop_mv_fpath "%~1" "%~2"
-        ) else if not exist "%~dp3%%~pnxN" (
-            call :func_mlk_lnkfile   "%~2"    "%%~N"  "%~dp3%%~pnxN"
-        )
-    )
-    
-    if not exist "%~2" echo/ Error: New Source Not found: "%~2"
-    echo/
+    if defined mk_use_fsu goto :subr_mlk_process_fsutil
+    if defined mk_use_fln goto :subr_mlk_process_findlinks
 
 goto :eof
+
+    ::  Usage  ::   see 'func_mlk_floop_cnt_vs_var'
+    :subr_mlk_process_fsutil
+        rem  get all links and move them or relink them
+        for /f "delims=" %%N in ('
+            call "%mk_fsu_bin%" hardlink list "%~1"
+        ') do for /f "delims=" %%O in ('
+            dir /b /s /a "%~d1%%~N"
+        ') do if "%%~aO" neq "" if not exist "%~2" (
+            call :func_mlk_floop_mv_fpath   "%~1"     "%~2"
+        ) else if not exist "%~3%%~pnxN" (
+            call :func_mlk_lnkfile          "%~2"   "%~d1%%~N"  "%~3%%~pnxN"
+        )
+
+        if not exist "%~2" echo/│    │ └─■ Error: New Source Not found: "%~2"
+
+    goto :eof
+
+
+    ::  Usage  ::   see 'func_mlk_floop_cnt_vs_var'
+    rem  last 'else' statement is a workaround for acsii/unicode non-english characters (this only works/applies when the link count is 0)
+    :subr_mlk_process_findlinks
+        rem  get all links and move them or relink them
+        for /f "delims=" %%N in ('
+            findlinks -nobanner "%~1"
+        ') do if "%%~aN" equ "" (
+            for /f "tokens=1,2 delims=:%mlk_tab_char%" %%O in ("%%~N") do for %%F in (%%~O) do if /i "%%~F" equ "Links" for %%F in (%%~P) do if "%%~F" equ "0" call :func_mlk_floop_mv_fpath "%~1" "%~2"
+         ) else if not exist "%~2" (
+            call :func_mlk_floop_mv_fpath "%~1" "%~2"
+        ) else if not exist "%~3%%~pnxN" (
+            call :func_mlk_lnkfile   "%~2"    "%%~N"  "%~3%%~pnxN"
+        )
+
+        if not exist "%~2" echo/│    │ └─■ Error: New Source Not found: "%~2"
+    goto :eof
 
 
 
@@ -472,16 +579,18 @@ rem    1 -- Path Inaccessible or Does not exist or Params empty
 rem    2 -- Hidden cmd error
 :func_mlk_unhide
     if "%~1" equ "" exit /b 1
-    
+
     call :func_mlk_check_path "" "%~1"  "%~2"
     if not errorlevel 0 exit /b 1
-    
-    set "mlk__HVar=%~a1"
-    if /i "%mlk__HVar:~3,1%" neq "h" ( set "mlk__HVar=" & exit /b 0 )
 
-    2>nul 1>nul attrib -H /L /S /D "%~1"
-    if "1%errorlevel%" neq "10" exit /b 2
+    set "mlk__HVar=%~a1"
+    if /i "%mlk__HVar:~3,1%" neq "h" ( ( set "mlk__HVar=" ) & exit /b 0 )
+
+    set /a "mlk_Obj{cntr}+=1"
+    if /i "%mlk__HVar:~0,1%" equ "d" set "mlk_hidden_dir{%mlk_Obj{cntr}%}=%~1"
     
+    2>nul 1>nul "%SystemRoot%\System32\attrib.exe" -H /L /S /D "%~1"
+    if "%errorlevel%" neq "0" exit /b 2
     exit /b 0
 
 goto :eof
@@ -495,9 +604,29 @@ rem  Checks var "mlk__HVar" and hides when needed
     if not defined mlk__HVar goto :eof
     set "mlk__HVar="
     
-    2>nul 1>nul attrib +H /L /S /D "%~1"
+    2>nul 1>nul "%SystemRoot%\System32\attrib.exe" +H /L /S /D "%~1"
     
     exit /b 0
 
 goto :eof
 
+
+
+::  Usage  ::  func_mlk_check_hidden_paths   new_root_path
+rem  Pulls all variables starting with string 'mlk_hidden_dir' and unhides the new directories 
+:func_mlk_check_hidden_paths
+    ( set mlk_hidden_dir 
+    ) 2>nul 1>nul || goto :eof
+    echo/
+    echo/╒═══════════════════════════════════════
+    echo/│  Rehide Directories
+    for /f "tokens=1,* delims==" %%A in ('set mlk_hidden_dir') do if exist "%~1%%~pnxB" (
+        echo/│    ├─■ "%~1%%~pnxB"
+        ( "%SystemRoot%\System32\attrib.exe" +H /L /S /D "%~1%%~pnxB"
+        ) 1>nul 
+        set "%%~A="
+    )
+    echo/│    ▀
+    echo/╘═══════════════════════════════════════
+    
+goto :eof
