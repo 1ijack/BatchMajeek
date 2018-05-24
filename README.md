@@ -5,6 +5,13 @@ Mysterious Windows Batch/Cmd scripts -- My personal, public exposition.
 Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
+- [duration.cmd](./duration.cmd ) -- calculates execution duration and dumps summary
+  - simple calling syntax such as: `duration.cmd timeout /t 5`
+  - dumps results/summary as a json object.  Specific data/information is toggled via variables
+  - no external dependencies required, but uses these standard windows binaries when found:
+	- cmd.exe: launches command(s) as subprocess of cmd.exe
+    - timeout.exe: optional script execution sleep
+    - w32tm.exe: supplies timezone and DST
 - [elevate](./elevate/) -- self-elevate scripts, functions and examples using "bunction" labels
   - [elevate/elevate.cmd](./elevate/elevate.cmd ) -- elevates all passed arguments or starts a elevated cmd console
   - [elevate/elvn.cmd](./elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
