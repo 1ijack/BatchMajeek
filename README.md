@@ -18,9 +18,9 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - [elevate/elvc.cmd](./elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
 - [fLines.cmd](./fLines.cmd ) -- prints file line counts using native find.exe
   - simple syntax:
-  -- `flines.cmd "%SystemRoot%\DirectX.log" C:\Windows\Logs\CBS\CBS.log`
-  -- `13967 : C:\Windows\DirectX.log`
-  -- `6431 : C:\Windows\Logs\CBS\CBS.log`
+  > `flines.cmd "%SystemRoot%\DirectX.log" C:\Windows\Logs\CBS\CBS.log`
+  > `13967 : C:\Windows\DirectX.log`
+  > `6431 : C:\Windows\Logs\CBS\CBS.log`
   - runs fairly quick
   - when directory, prints line counts for all the normal files in that directory
 - [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
