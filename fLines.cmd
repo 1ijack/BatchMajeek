@@ -33,7 +33,7 @@ rem lazy args parse
 if "%~1" neq "" for %%A in (%*
 ) do if "%%~A" neq "" if exist "%%~A" call :func_FindLineCount "" %%A
 
-rem method - true cleaver of clear falseness
+rem method - true cleaver of cleared falseness
 set "lc{demo}=%lc{demo}%false"
 if /i "%lc{demo}:~0,1%" equ "t" (set "lc{demo}=true") else set "lc{demo}="
 
@@ -71,7 +71,7 @@ rem  requires param2 - "dir\targetFile.extension"
     )
     set "%~1=0"
 
-    rem when dir get reloop with file list
+    rem when dir reloop with file list
     set "t{aB}=%~a2 "
     if /i "%t{aB}:~0,1%" equ "d" (
         for %%A in ("%~2\*") do call %~0 "t{A}" "%%A"
