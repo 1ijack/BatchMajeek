@@ -29,6 +29,16 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - DOES NOT move/update junctions or symlinks
 - [pidme.cmd](./pidme.cmd ) -- Launches command and returns it's PID using powershell
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
+- [subExport.bat](./subExport.bat ) -- Uses ffmpeg.exe dump/export/save all textbased subtitles from video containers (like .mkv)
+  - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
+  - dump/clean ffmpeg subtitle error/export log files
+  - no support for image-based subtitles
+  - simple/efficient/robust args parser
+  - simple file extension and subtitle type filtering
+  - saves files as {vidoeFileName.extension}.{langId}.{streamId}.{subExtension}
+    - when langId is undefined, uses 'und' as langId
+    - creates the following subtitle files FOR EACH streamId: .ass, .srt, .vtt
+  - default path recursion.  Unable to change this behavior at the moment.  Not super efficient, but works.
 - [RemoveEmpties.bat](./RemoveEmpties.bat ) -- Removes Empty Files/SubDirectories from the defaulted/given path(s)
   - My use-case: remove leftover files/dirs from the temp directories
   - determines whether file is empty (by file size)
