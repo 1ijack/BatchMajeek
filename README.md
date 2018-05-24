@@ -29,6 +29,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - DOES NOT move/update junctions or symlinks
 - [pidme.cmd](./pidme.cmd ) -- Launches command and returns it's PID using powershell
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
+  - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
 - [subExport.bat](./subExport.bat ) -- Uses ffmpeg.exe dump/export/save all textbased subtitles from video containers (like .mkv)
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
   - dump/clean ffmpeg subtitle error/export log files
