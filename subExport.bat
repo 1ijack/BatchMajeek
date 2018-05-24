@@ -1,4 +1,4 @@
-::  By JaCk  |  Release 05/18/2018  |  url  |  subExport.bat  --  Export all text subtitles and font attachments from mkv containers depending on subtitle language id
+::  By JaCk  |  Release 05/18/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/subExport.bat  |  subExport.bat  --  Export all text subtitles and font attachments from mkv containers depending on subtitle language id
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
