@@ -37,6 +37,18 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [pidme.cmd](./pidme.cmd ) -- Launches command and returns it's PID using powershell
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
+- [slength.cmd](./slength.cmd ) -- Uses findstr.exe to calculate length of a string or the length of a variable's value
+  - string example: slength.cmd
+  ```
+  slength.cmd "this is my super long string"
+  28
+  ```
+  - variable example:
+  ```
+  set "abc=0123456789"
+  slength.cmd abc
+  10
+  ```
 - [subExport.bat](./subExport.bat ) -- Uses ffmpeg.exe dump/export/save all textbased subtitles from video containers (like .mkv)
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
   - dump/clean ffmpeg subtitle error/export log files
