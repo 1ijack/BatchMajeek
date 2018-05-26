@@ -35,13 +35,12 @@ if "%~1" neq "" for %%A in (%*
 
 rem method - true cleaver of cleared falseness
 set "lc{demo}=%lc{demo}%false"
-if /i "%lc{demo}:~0,1%" equ "t" (set "lc{demo}=true") else set "lc{demo}="
+if /i "%lc{demo}:~0,1%" neq "t" set "lc{demo}="
 
 rem example/demo dump when no args
 if defined lc{demo} if "%~1" equ "" for %%A in ("%SystemRoot%\*.log"; "%SystemRoot%\*.ini") do (
     call :func_FindLineCount line{count} "%%A"
     if defined line{count} call echo/%%line{count}%% : %%A
-    set "line{count}="
 )
 
 rem leave script
@@ -65,31 +64,23 @@ rem  optional param1 - returnVar - when missing, prints line count and file to s
 rem  requires param2 - "dir\targetFile.extension"
 :func_FindLineCount
     if "%~2" equ "" goto :eof
-    if "%~1" equ "" (
-        call %~0 t{A} %2
-        goto :eof
-    )
+    if "%~1" equ "" ((call %~0 t{A} %2) &goto :eof)
     set "%~1=0"
 
     rem when dir reloop with file list
     set "t{aB}=%~a2 "
     if /i "%t{aB}:~0,1%" equ "d" (
         for %%A in ("%~2\*") do call %~0 "t{A}" "%%A"
-        set "%~1="
         goto :eof
     )
     set "t{aB}="
 
-    rem ensure file exist and grab lines
-    if exist %2 for /f "delims=" %%A in ('
+    rem grab lines
+    for /f "delims=" %%A in ('
         %SystemRoot%\System32\find.exe /c /off /v /i "" %2
-    ') do for %%B in (%%~A) do if "%%~xB%%~nB" gtr "----------1.a" ( set "%~1=%%B" ) 2>nul
+    ') do for %%B in (%%~A) do if "%%~xB%%~nB" gtr "----------1.a" set "%~1=%%B"
 
     rem when internal reloop print and clear
-    if "%~1" equ "t{A}" if defined %~1 (
-        call echo/%%%~1%% : %2
-        set "t{A}="
-    )
-
+    if "%~1" equ "t{A}" if defined %~1 echo/%t{A}% : %2
+    set "t{A}="
 goto :eof
-
