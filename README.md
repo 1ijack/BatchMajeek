@@ -6,6 +6,23 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
 - [compactor.cmd](./compactor.cmd ) -- wrapper around the windows binary compact.exe to compress/uncompress files via the NTFS filesystem
+  - Can walk down a directory tree and uncompress all files with a 1.0 ratio
+  - Full args parse
+  ```
+	compactor -i C:\Windows\Temp\PowerPlan.log -u
+	compactor.cmd:unCompressExtensions: 05/28/18 23:28:34: PowerPlan.log: 0 files within 1 directories were uncompressed.
+
+	compactor -i C:\Windows\Temp\PowerPlan.log -z
+	compactor.cmd:unCompressRedundant: 05/28/18 23:28:47: PowerPlan.log: 0 files within 1 directories were uncompressed.
+
+	compactor -i C:\Windows\Temp -r -e .log -c
+	compactor.cmd:CompressExtensions: 05/28/18 23:31:13: C:\Windows\Temp\HighPerformancePlan.log: The compression ratio is 1.8 to 1.
+	compactor.cmd:CompressExtensions: 05/28/18 23:31:14: C:\Windows\Temp\PowerPlan.log: The compression ratio is 1.0 to 1.
+	compactor.cmd:CompressExtensions: 05/28/18 23:31:14: C:\Windows\Temp\vmware-SYSTEM\vmware-usbarb-1111.log: The compression ratio is 1.2 to 1.
+	compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM\vmware-usbarb-2222.log: The compression ratio is 1.2 to 1.
+	compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-3333.log: The compression ratio is 1.5 to 1.
+	compactor.cmd:CompressExtensions: 05/28/18 23:31:16: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-4444.log: The compression ratio is 1.1 to 1.
+  ```
 - [duration.cmd](./duration.cmd ) -- calculates execution duration and dumps summary
   - simple calling syntax such as: `duration.cmd timeout /t 5`
   - dumps results/summary as a json object.  Specific data/information is toggled via variables
@@ -28,8 +45,8 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - when directory, prints line counts for all the normal files in that directory
 - [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
   - to generate 10 strings: for /l %Z in (1,1,10) do [gstr.cmd](./gstr.cmd )
-  - to generate 3 strings, 12, 15, 50 characters: [gstr.cmd](./gstr.cmd ) 12 15 50 
-- [h2p.cmd](./h2p.cmd ) -- grabs pdfs of url address using "[wkhtmltopdf.exe](https://wkhtmltopdf.org/downloads.html)".  
+  - to generate 3 strings, 12, 15, 50 characters: [gstr.cmd](./gstr.cmd ) 12 15 50
+- [h2p.cmd](./h2p.cmd ) -- grabs pdfs of url address using "[wkhtmltopdf.exe](https://wkhtmltopdf.org/downloads.html)".
   - Code has been mostly scrubbed and unused functions have been removed.
   - Names pdf file with urlstring+currentdateStamp
   - ASCII encoded URL names decoded for auto-filename generator
@@ -77,7 +94,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - Adjusts to system timezone and DST (or any other time adjustments registered with windows)
   - Returns unixTime in Seconds OR milliseconds, option defined in 'user settings' inside the script
   - Auto calculates leap-year(s)
-  - Optimized for quick execution. Runs 30%-50% faster when all comments/empty lines  are removed 
+  - Optimized for quick execution. Runs 30%-50% faster when all comments/empty lines  are removed
 - [unixTimeFull.bat](./unixTimeFull.bat ) -- returns the current system time as unix time (01/01/1970 )
   - Same as [unixTime.bat](./unixTime.bat ), but without the optimizations.
   - Uses functions for further customization
