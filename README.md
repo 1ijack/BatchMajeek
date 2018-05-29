@@ -5,6 +5,7 @@ Mysterious Windows Batch/Cmd scripts -- My personal, public exposition.
 Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
+- [compactor.cmd](./compactor.cmd ) -- wrapper around the windows binary compact.exe to compress/uncompress files via the NTFS filesystem
 - [duration.cmd](./duration.cmd ) -- calculates execution duration and dumps summary
   - simple calling syntax such as: `duration.cmd timeout /t 5`
   - dumps results/summary as a json object.  Specific data/information is toggled via variables
