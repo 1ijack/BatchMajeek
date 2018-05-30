@@ -31,7 +31,7 @@ rem disable, use   ""  -- [undefined]/blank
 ::: main ::::::::::::::::::::::::::::::
 set "{len}="
 set "{str}=%~1"
-(if defined %{str}% call set "{str}=%%{str}%%") 2>nul
+(if defined %~1 call set "{str}=%%%~1%%") 2>nul
 rem General concept credit/inspiration/source for length calc
 rem by Frank Westlake - RandomizeKey.cmd - lines 24-26
 rem :: From the desk of Frank P. Westlake, 2013-01-03

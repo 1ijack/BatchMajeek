@@ -57,7 +57,9 @@ goto :eof
     rem variable or string
     set "{len}="
     set "{str}=%~1"
-    ( if defined %{str}% call set "{str}=%%{str}%%" ) 2>nul
+    ( if defined %~1 call set "{str}=%%%~1%%" 
+    ) 2>nul
+    
     rem measuring tape
     if defined {str} call :func_sln_lenString
     rem reporter
