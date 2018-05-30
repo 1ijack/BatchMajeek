@@ -74,12 +74,6 @@ rem false state = [undefined]
 ::
 :::::::::::::::::::::::::::::::::::::::
 
-rem inf-loop/crash detection
-( echo/"%~nx1" | findstr /c:"%~nx0"
-) 2>nul 1>nul && (
-    echo/%~nx0: Error: %date:~-10,6%%date:~-2% %time:~-12,8%: *** infinite loop ***:  "%~n0" attempted to evaluate "%~n1". Unable to continue.
-    goto :func_dur{gtfo}
-)
 rem pre-clear/set all important vars
 for %%A in (dur{tsec};dur{tms};dur{sts};dur{ets};dux{stamp}) do set "%%A="
 set /a "dux{offset}+=0,dux{shift}=dux{offset},dux{leap}+=0,dur{waitExit}+=0"
