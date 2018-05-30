@@ -1,23 +1,23 @@
-::  by JaCk  |  Release 05/11/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/unixTimeFull.bat  |  unixTimeFull.bat  --  returns current time in unix time  --  total elapsed seconds since January 1st, 1970
+::  by JaCk  |  Release 05/29/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/unixTimeFull.bat  |  unixTimeFull.bat  --  returns current time in unix time  --  total elapsed seconds since January 1st, 1970
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
-::  
+::
 ::  This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
-::  
+::
 ::  Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
-::  
+::
 ::  1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
-::  
+::
 ::  2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
-::  
+::
 ::  3. This notice may not be removed or altered from any source distribution.
 :::
 ::::::::::::::::::::::::::::::::::::::::
 ::
 ::  What is teh Unix Time?
 ::    The number of seconds that have passed since the beginning of 00:00:00 UTC Thursday, 1 January 1970. The second layer encodes that number as a sequence of bits or decimal digits.
-::  [ source: https://en.wikipedia.org/wiki/Unix_time ]  --  accessed on 04/24/2018 
+::  [ source: https://en.wikipedia.org/wiki/Unix_time ]  --  accessed on 04/24/2018
 ::
 ::::::::::::::::::::::::::::::::::::::::
 @echo off & setlocal DisableDelayedExpansion EnableExtensions & ( for /f "tokens=1 delims==" %%A in ('set utx_') do set "%%~A=" ) 2>nul 1>nul & goto :func_utx_main
@@ -31,7 +31,7 @@
 :func_utx_user_settings
     rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     rem  -----------------------------------------
-    rem  Boolean settings below, use the following values to enable/disable behavior: 
+    rem  Boolean settings below, use the following values to enable/disable behavior:
     rem    to Enable,  set to: true
     rem    to Disable, set to: false [or undefined]
     rem  -----------------------------------------
@@ -39,9 +39,15 @@
     rem  Note:  When below setting is undefined/false, output is seconds;  otherwise, when value is 'true', output is in milliseconds
     set "utx_out_ms=false"      rem  Default:      ;  Description: utx_out_ms --- will display with ms upto 1000 ms
     rem  -----------------------------------------
+
+    rem  Note:  UTC timezone/DST/offset source binary; when both are false, script will not use either; when both true, uses wmic only
+    set "utx_tz_w32tm=false"    rem  Default: false;  Description: utx_tz_w32tm --- will use the w32tm.exe to get timezone info
+    set "utx_tz_wmic=true"      rem  Default: true ;  Description: utx_tz_wmic  --- will use the wmic.exe to get timezone info
+    rem  -----------------------------------------
+
     rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    
+
     rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     rem -----------------------------------------
     rem  String settings below, use expected strings
@@ -49,14 +55,14 @@
     rem    to Disable, set to: [undefined]
     rem -----------------------------------------
 
-    rem  The following is to bypass asking the w32tm.exe for the timezone settings.  Value should be in seconds (integer).  When value is undefined, script will ask the OS for timezone configuration.
+    rem  The following is to bypass asking the w32tm.exe/wmic for the timezone settings.  Value should be in seconds (integer).  When value is undefined, script will ask the OS for timezone configuration.
     rem  -- Example: UTC+7 hours  (aka 420 min), value would be: 25200
     rem  -- Example: UTC+0 hours  (aka   0 min), value would be: 0
     rem  -- Example: UTC-10 hours (aka 600 min), value would be: -36000
     set "utx_utc_offset="
     rem -----------------------------------------
     rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
 goto :eof
 
 ::::::::::::::::::::::::::::::::::::::::
@@ -71,10 +77,10 @@ goto :eof
 
     echo/%utx_time{unix}%
 
-    rem Env Cleanup 
-    (   for /f "tokens=1 delims==" %%A in ('set utx_') do set "%%~A=" 
+    rem Env Cleanup
+    (   for /f "tokens=1 delims==" %%A in ('set utx_') do set "%%~A="
         endlocal & goto :eof
-    ) 2>nul 1>nul 
+    ) 2>nul 1>nul
 
 goto :eof
 
@@ -90,13 +96,17 @@ goto :eof
 rem  ensure that dependencies are resolved
 :func_utx_error_checks
     rem  boolean NEEDS to be defined as something
-    if not defined utx_out_ms set "utx_out_ms=false"
+    set "utx_out_ms=%utx_out_ms%false"
 
     rem  Making sure binary exists, hard-coded value takes priority
     if defined utx_utc_offset (
-        set /a "utx_utc{shift}=%utx_utc_offset% * 1"
-    ) else if not exist "%SystemRoot%\System32\w32tm.exe" set "utx_utc{shift}=0"
-    
+        set /a "utx_utc{shift}=utx_utc_offset+0"
+    ) else if not exist "%SystemRoot%\System32\w32tm.exe" (
+        set "utx_utc{shift}=0"
+    ) else if not exist "%SystemRoot%\System32\wbem\wmic.exe" (
+        set "utx_utc{shift}=0"
+    )
+
 goto :eof
 
 
@@ -111,7 +121,7 @@ rem  Note:  DOES overwrite returnVarMS value.
     rem  choose between system-clock vs provided-time
     set "utx_scest=%time%"
     if "%~3" neq "" set "utx_scest=%~3"
-    
+
     rem  calculate total seconds and round milliseconds
     rem    returnVar  ghetto ms -- purposefully not checking/fixing octal numbers to ensure three digit MS number
     set "%~2=%utx_scest:~-2%0"
@@ -122,12 +132,12 @@ rem  Note:  DOES overwrite returnVarMS value.
 goto :eof
 
 
-::  Usage  ::  func_utx_get_utc_timeShift   returnVar  optional-[ "hours" | "minutes" | "seconds" | "milliseconds" ]
+::  Usage  ::  func_utx_get_timeShift_w32tm   returnVar  optional-[ "hours" | "minutes" | "seconds" | "milliseconds" ]
 rem  Returns the (seconds) time difference from the system's timezone and UTC0 (daylight saving and other adjustments also factored)
 rem  Note:  Number of seconds can be positive OR negative
 rem  Note:  Param2 is optional units of time returned:  'hours', 'minutes', 'seconds', 'milliseconds'
 rem  Note:  Param2 default is 'minutes'
-:func_utx_get_utc_timeShift
+:func_utx_get_timeShift_w32tm
     if "%~1" equ "" goto :eof
 
     rem  Get current time adjustments
@@ -143,14 +153,39 @@ rem  Note:  Param2 default is 'minutes'
 
     if    "%~2" equ      ""        goto :eof
     if /i "%~2" equ   "minutes"    goto :eof
-    
+
     rem  convert min ->  ( seconds OR milliseconds )
     if /i "%~2" equ    "hours"     set /a "%~1/=60"
     if /i "%~2" equ   "seconds"    set /a "%~1*=60"
     if /i "%~2" equ    "secs"      set /a "%~1*=60"
     if /i "%~2" equ "milliseconds" set /a "%~1*=6000"
     if /i "%~2" equ     "ms"       set /a "%~1*=6000"
-    
+
+goto :eof
+
+
+
+::  Usage  ::  func_utx_get_timeShift_wmic   returnVar  optional-[ "hours" | "minutes" | "seconds" | "milliseconds" ]
+rem  Returns the (seconds) time difference from the system's timezone and UTC0 (daylight saving and other adjustments also factored)
+rem  Note:  Number of seconds can be positive OR negative
+rem  Note:  Param2 is optional units of time returned:  'hours', 'minutes', 'seconds', 'milliseconds'
+rem  Note:  Param2 default is 'minutes'
+:func_utx_get_timeShift_wmic
+    if "%~1" equ "" goto :eof
+
+    rem  Get current time adjustments
+    for /f %%g in ('"%SystemRoot%\System32\wbem\WMIC.exe computersystem get currenttimezone 2>&1"') do if %%g1 lss 1 set "%~1+=%%g"
+
+    if    "%~2" equ      ""        goto :eof
+    if /i "%~2" equ   "minutes"    goto :eof
+
+    rem  convert min ->  ( seconds OR milliseconds )
+    if /i "%~2" equ    "hours"     set /a "%~1/=60"
+    if /i "%~2" equ   "seconds"    set /a "%~1*=60"
+    if /i "%~2" equ    "secs"      set /a "%~1*=60"
+    if /i "%~2" equ "milliseconds" set /a "%~1*=6000"
+    if /i "%~2" equ     "ms"       set /a "%~1*=6000"
+
 goto :eof
 
 
@@ -165,18 +200,21 @@ rem    Dates need to be defined as "MM/DD/YYYY" (strip DOW)
 rem    ghetto milliseconds ftw
 :func_utx_calc_date_secs
     if "%~1" equ "" goto :eof
-    if "%~2" equ "" ( ( call %~0   %1   "%date:* =%"   %3 ) & goto :eof )
-    if "%~3" equ "" ( ( call %~0   %1   %2   "01/01/1970" ) & goto :eof )
+    if "%~2" equ "" (( call %~0   %1   "%date:* =%"   %3 ) & goto :eof )
+    if "%~3" equ "" (( call %~0   %1   %2   "01/01/1970" ) & goto :eof )
 
     set "utx_p{two}=%~2"
     set "utx_p{tri}=%~3"
-    
+
     if %utx_p{two}:~-4%%utx_p{two}:~-10,2%%utx_p{two}:~-7,2% lss %utx_p{tri}:~-4%%utx_p{tri}:~-10,2%%utx_p{tri}:~-7,2% (
         set "utx_p{two}=%utx_p{tri}%"
         set "utx_p{tri}=%utx_p{two}%"
     )
-
-    if not defined utx_utc{shift} call :func_utx_get_utc_timeShift   "utx_utc{shift}"    "seconds"
+    if defined utx_tz_wmic if exist "%SystemRoot%\System32\wbem\WMIC.exe" set "utx_tz_w32tm="
+    if not defined utx_utc{shift} (
+        if defined utx_tz_wmic call :func_utx_get_timeShift_wmic   "utx_utc{shift}"    "seconds"
+        if defined utx_tz_w32tm call :func_utx_get_timeShift_w32tm  "utx_utc{shift}"    "seconds"
+    )
     call :func_utx_calc_time_secs_ms   "utx_elapsed{secs}"   "utx_elapsed{ms}"   "%time%"
 
     for /l %%A in (%utx_p{tri}:~-4%,1,%utx_p{two}:~-4%) do set /a "utx_leap{total}+=!(%%A %% 4 & %%A %% 100 & %%A %% 400)"
@@ -187,5 +225,3 @@ rem    ghetto milliseconds ftw
     if defined utx_elapsed{ms} call set "%~1=%%%~1%%%utx_elapsed{ms}%"
 
 goto :eof
-
-

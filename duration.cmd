@@ -1,4 +1,4 @@
-::  by JaCk  |  Release 05/22/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/duration.bat  |  duration.bat  --  displays/calculates execution duration by acting as a wrapper which launches all args in a separate window/memory-space
+::  by JaCk  |  Release 05/29/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/duration.bat  |  duration.bat  --  displays/calculates execution duration by acting as a wrapper which launches all args in a separate window/memory-space
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -14,7 +14,7 @@
 ::  3. This notice may not be removed or altered from any source distribution.
 :::
 @echo off &(set /a "dur{cmdCounter}+=1") &setlocal DisableDelayedExpansion EnableExtensions
-REM echo on
+
 :::::::::::::::::::::::::::::::::::::::
 ::
 ::: User/Script/Report Settings
@@ -22,7 +22,8 @@ REM echo on
 :::::::::::::::::::::::::::::::::::::::
 
 rem start subprocess cmdline options
-set "dur{startOpts}=start /d "%cd%" /i /min /separate /wait"
+REM set "dur{startOpts}=start /d "%cd%" /i /min /separate /wait"
+set "dur{startOpts}=echo/&call"
 
 rem wait # of seconds before leaving script
 rem hardpause   -1
@@ -33,10 +34,15 @@ set "dur{waitExit}="
 rem hardcoded utc time shift in seconds -- bypass OS query
 set "dux{offset}="
 
+
 ::: Boolean[on/off] switches
 rem true  state = "true"
 rem true  state = [defined]
 rem false state = [undefined]
+
+    rem OS utc time query bin 
+    set "dux{wmic}tz=true"
+    set "dux{w32tm}tz="
 
     rem bool -- print duration time
     set "dur{printDur}=true"
@@ -54,13 +60,13 @@ rem false state = [undefined]
     set "dur{printTimes}=true"
 
     rem bool -- print cmdline
-    set "dur{printEval}=true"
+    set "dur{printEval}="
 
     rem bool -- print json escaped
     set "dur{printEscaped}=true"
 
     rem bool -- print wait status when waiting
-    set "dur{printWait}=true"
+    set "dur{printWait}="
 
 :::::::::::::::::::::::::::::::::::::::
 ::
@@ -71,7 +77,7 @@ rem false state = [undefined]
 rem inf-loop/crash detection
 ( echo/"%~nx1" | findstr /c:"%~nx0"
 ) 2>nul 1>nul && (
-    echo/%date:~-10,6%%date:~-2% %time:~-12,8%: %~nx0: Error: *** infinite loop ***:  "%~n0" attempted to evaluate "%~n1". Unable to continue.
+    echo/%~nx0: Error: %date:~-10,6%%date:~-2% %time:~-12,8%: *** infinite loop ***:  "%~n0" attempted to evaluate "%~n1". Unable to continue.
     goto :func_dur{gtfo}
 )
 rem pre-clear/set all important vars
@@ -138,7 +144,7 @@ goto :func_dur{gtfo}
     )
 
     rem gracefully leave after un-setting vars
-    for %%A in (dur{tsec};dur{tms};dur{sts};dur{ets};dur{ed};dur{et};dur{sd};dur{st};dux{ms};dux{shift};dux{leap};dux{stamp};dur{startOpts};dur{printWait};dur{waitExit};dur{output};dur{cmdline}) do set "%%A="
+    for %%A in (dux{wmic}tz;dux{w32tm}tz;dur{tsec};dur{tms};dur{sts};dur{ets};dur{ed};dur{et};dur{sd};dur{st};dux{ms};dux{shift};dux{leap};dux{stamp};dur{startOpts};dur{printWait};dur{waitExit};dur{output};dur{cmdline}) do set "%%A="
     endlocal
 goto :eof
 
@@ -263,8 +269,12 @@ rem  returns returnVar defined with the current time in unixtime: total elapsed 
     if "%~2" neq "" ( set "dux{t}=%~2"  ) else set "dux{t}=%time%"
     if "%~3" neq "" ( set "dux{d}=%~3"  ) else set "dux{d}=%date%"
     if "%~4" neq "" ( set "dux{ms}=%~4" ) else set "dux{ms}=false"
+    if defined dux{wmic}tz if exist "%SystemRoot%\System32\wbem\WMIC.exe" set "dux{w32tm}tz="
     rem calc offset
-    if "%dux{shift}%" equ "0" ( for /f "tokens=1-8 delims=: " %%A in ('"%SystemRoot%\System32\w32tm.exe" /tz') do for %%e in ( "%%~A|%%~B"; "%%~B|%%~C"; "%%~C|%%~D"; "%%~D|%%~E"; "%%~E|%%~F"; "%%~F|%%~G"; "%%~G|%%~H" ) do for /f "tokens=1,2 delims=|" %%f in (%%e) do if /i "%%~f" equ "Bias" for /f "tokens=1 delims=min" %%m in ("%%~g") do if "%%~m" neq "0" set /a "dux{shift}+=%%~m*60") 2>nul 1>nul
+    if "%dux{shift}%" equ "0" ( 
+        if defined dux{wmic}tz for /f %%g in ('"%SystemRoot%\System32\wbem\WMIC.exe computersystem get currenttimezone 2>&1"') do if %%g1 lss 1 set /a "dux{shift}+=%%g*60"
+        if defined dux{w32tm}tz for /f "tokens=1-8 delims=: " %%A in ('"%SystemRoot%\System32\w32tm.exe" /tz') do for %%e in ( "%%~A|%%~B"; "%%~B|%%~C"; "%%~C|%%~D"; "%%~D|%%~E"; "%%~E|%%~F"; "%%~F|%%~G"; "%%~G|%%~H" ) do for /f "tokens=1,2 delims=|" %%f in (%%e) do if /i "%%~f" equ "Bias" for /f "tokens=1 delims=min" %%m in ("%%~g") do if "%%~m" neq "0" set /a "dux{shift}+=%%~m*60"
+    ) 2>nul 1>nul
     rem calc leapyear
     if "%dux{leap}%"  equ "0" for /l %%A in (1970,1,%dux{d}:~-4%) do set /a "dux{leap}+=!(%%A %% 4 & %%A %% 100 & %%A %% 400)"
     rem calc timestamp
