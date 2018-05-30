@@ -87,6 +87,7 @@ goto :eof
     echo/      --compress               compact.exe /c
     echo/
     echo/      -e, --ext,             List of extensions to for file matching
+    echo/      -e all, -e *.*           extension wildcards: *.*, *, all 
     echo/      --extensions             can be called multiple times
     echo/                               example: -e .txt .log *.* -e .sql
     echo/
@@ -105,13 +106,13 @@ goto :eof
     echo/
     echo/      -b, --binary           Custom path location for compact.exe
     echo/
-    echo/      -d, --directory,       Directories to search in or files to search for
+    echo/      -d, --directory,       Directories to search in or files to process
     echo/      -i, --input,             can be called multiple times
     echo/      -p, --path               example: -i file.log -i "path\file 2" -i D:\path
     echo/
     echo/  Notes:
     echo/
-    echo/      All parameters are parsed before anything workload is processed.  These parameters [-e, --ext, --extensions] and [-d, -i, -p, --directory, --input, --path] both append, therefore they can be submitted multiple times when needed.
+    echo/      All parameters are parsed before any workload is processed.  These parameters [-e, --ext, --extensions] and [-d, -i, -p, --directory, --input, --path] both append, therefore they can be submitted multiple times when needed.
     echo/
     goto :eof
 
