@@ -107,8 +107,19 @@ if not defined dur{ets} (
 set /a "dur{tms}+=0,dur{tsec}+=0"
 
 rem allows for negative time which is a systemclock error
-if %dur{tsec}% neq 0 if %dur{tms}% lss 0 set /a "dur{tsec}-=1,dur{tms}+=1000"
-if %dur{tsec}% equ 0 set "dur{tsec}="
+if %dur{tsec}%. neq 0. if %dur{tms}%. lss 0. set /a "dur{tsec}-=1,dur{tms}+=1000"
+if %dur{tsec}%. equ 0. set "dur{tsec}="
+
+rem allow negative milliseconds when secs are undefined
+if  %dur{tms}%. lss 0. if not defined dur{tsec} set "dur{tms}n=%dur{tms}%"
+
+rem pad/trim zeros
+set "dur{tms}=000%dur{tms}:-=%
+set "dur{tms}=%dur{tms}:~-3%
+
+rem readjust negative milliseconds
+if defined dur{tms}n set "dur{tms}=-%dur{tms}%"
+set "dur{tms}n="
 
 rem prepare/print results
 if defined dur{printEval} set dur{cmdline}=%*
