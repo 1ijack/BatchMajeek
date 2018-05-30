@@ -37,9 +37,9 @@ rem variables/settings overwritten by properly passed in parameter(s)
 
 
     rem run booleans - true/false - when the following are true, runs these specific jobs/script-functions
-    set "run{CompressExtensions}="
-    set "run{unCompressRedundant}="
-    set "run{unCompressExtensions}="
+    set "run{run_compressor}="
+    set "run{run_redundants}="
+    set "run{run_decompress}="
 
 
     rem recurse flag - true/false - when true walks down a directory tree
@@ -69,10 +69,10 @@ goto :eof
                               goto :eof
 
 :ahh_helps
+    rem unsolicited overprint prevention
     if "%~1" neq "" if %~1. gtr 0. goto :eof
     set /a "help{msg}c+=1"
-    REM call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: Dumping usage information
-    REM echo/
+    rem help me... pretty please
     echo/  %~nx0:
     echo/       A robust wrapper around compact.exe which compresses/uncompresses files via the filesystem
     echo/
@@ -87,7 +87,7 @@ goto :eof
     echo/      --compress               compact.exe /c
     echo/
     echo/      -e, --ext,             List of extensions to for file matching
-    echo/      -e all, -e *.*           extension wildcards: *.*, *, all 
+    echo/      -e all, -e *.*           extension wildcards: *.*, *, all
     echo/      --extensions             can be called multiple times
     echo/                               example: -e .txt .log *.* -e .sql
     echo/
@@ -133,7 +133,6 @@ rem although both work, intended use as goto instead of call
     if     "%~1"     equ       ""         goto :argShwift
     rem pre-define counters
     set /a "arg{blank}c=0,arg{total}c+=1"
-
     rem  define key
     for /f "tokens=* delims=/-\" %%A in ("-%~1") do if "%~1" neq "%%~A" set "arg{One}key=%%~A"
     REM for /f "tokens=* delims=/-\" %%A in ("-%~2") do if "%~2" neq "%%~A" set "arg{Two}key=%%~A"
@@ -141,9 +140,9 @@ rem although both work, intended use as goto instead of call
     rem  \\\\\\\\\\\\\\\ ///////////////
     rem       ArgParser - KeyLess
     rem  /////////////// \\\\\\\\\\\\\\\
-
     rem  keyless matching
-    if not defined arg{One}key if exist "%~1" if defined path{compact} call set "path{compact}=%%path{compact}%%; %1"
+
+    if not defined arg{One}key if exist "%~1" if "%~a1" neq "" call set "path{compact}=%%path{compact}%%; %1"
 
     rem  \\\\\\\\\\\\\\\ ///////////////
     rem       ArgParser - Key reuse
@@ -177,14 +176,14 @@ rem although both work, intended use as goto instead of call
     rem       ArgParser - Key ONLY
     rem  /////////////// \\\\\\\\\\\\\\\
 
-    if /i "%arg{One}key%" equ "compress"         set "run{CompressExtensions}=true"
+    if /i "%arg{One}key%" equ "compress"         set "run{run_compressor}=true"
     if /i "%arg{One}key%" equ "help"             call :ahh_helps
     if /i "%arg{One}key%" equ "force"            set "bool{forceCompact}=true"
     if /i "%arg{One}key%" equ "no-force"         set "bool{forceCompact}="
     if /i "%arg{One}key%" equ "no-recurse"       set "bool{recurseDirs}="
     if /i "%arg{One}key%" equ "recurse"          set "bool{recurseDirs}=true"
-    if /i "%arg{One}key%" equ "uncompress"       set "run{unCompressExtensions}=true"
-    if /i "%arg{One}key%" equ "zerocompression"  set "run{unCompressRedundant}=true"
+    if /i "%arg{One}key%" equ "uncompress"       set "run{run_decompress}=true"
+    if /i "%arg{One}key%" equ "zerocompression"  set "run{run_redundants}=true"
 
     rem  \\\\\\\\\\\\\\\ ///////////////
     rem       ArgParser - Key w/Value(s)
@@ -220,24 +219,21 @@ rem although both work, intended use as goto instead of call
     goto :argShwift
     goto :eof
 
+
 :argExtensionParser
     if "%~1" equ "" goto :argShwift
     set /a "arg{total}c+=1"
-
     for /f "tokens=* delims=/-\" %%A in ("-%~1") do (
         if /i "%~1" equ "all" ((shift /1) &set "ext{compact}all=*.*")
         if    "%~1" equ "*."  ((shift /1) &set "ext{compact}all=*.*")
         if    "%~1" equ  ".*" ((shift /1) &set "ext{compact}all=*.*")
         if    "%~1" equ  "*"  ((shift /1) &set "ext{compact}all=*.*")
         if    "%~1" equ "*.*" ((shift /1) &set "ext{compact}all=*.*")
-        if "%~1" equ "%~x1" (
-            if "%~1" equ "%%~A" (
-                call set "ext{compact}=%%ext{compact}%% %1;"
-                shift /1
-            ) else goto :argShwift
+        if    "%~1" equ "%~x1" (
+            call set "ext{compact}=%%ext{compact}%% %1;"
+            shift /1
         ) else goto :argShwift
     )
-
     goto :argExtensionParser
     goto :eof
 
@@ -249,23 +245,6 @@ rem un-defines script variables
     ) else for %%V in (path{compact};bool{recurseDirs};bool{forceCompact};bin{compact};d{s}a;c{f}a;arg{total}c;arg{blank}c;arg{shift}c;arg{One}key;ext{compact}all;ext{compact};help{msg}c
     ) do set "%%V="
     if "%~2" neq "" ((shift /1) &goto %~0)
-    goto :eof
-
-
-::  Usage  ::   compressExtensions  dirPath1\*.*   "dir Path 2\*.extension2"   dirPath3\file3   etc
-rem Recursively walks dir tree and tries to compress all the files matching the extension
-rem When matching file is already compressed, does not recompress
-:compressExtensions
-    if "%~1" equ "" goto :eof
-
-    ( for /f "delims=" %%A in ('
-        dir /b /a:-d %d{s}a% %1
-    ') do for /f "skip=6 delims=" %%U in ('
-        %bin{compact}% %c{f}a% /I /Q /C "%%A"
-    ') do call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-    ) 2>nul
-    shift /1
-    goto %~0
     goto :eof
 
 
@@ -299,42 +278,55 @@ rem initializes the script environment by defining default states and performing
 
 ::  Usage  ::  runSelector
 rem runs job/function based on boolean variables OR prints help
+rem checks whether the path is a file or a directory
 rem checks for extension list variable
 rem checks for wildcard extension boolean
-rem checks whether the path is directly to a file, instead of a directory
 :runSelector
-    call :validateBoolBi bool{forceCompact} bool{recurseDirs} run{CompressExtensions} run{unCompressRedundant} run{unCompressExtensions}
-
+    rem runner dependency resolution cry for help
+    call :validateBoolBi bool{forceCompact} bool{recurseDirs} run{run_compressor} run{run_redundants} run{run_decompress}
     if not defined path{compact} ((call :ahh_helps %help{msg}c%) &goto :deInitEnv)
-    if not defined run{CompressExtensions} if not defined run{unCompressRedundant} if not defined run{unCompressExtensions} if %help{print}%. lss 1. ((call :ahh_helps %help{msg}c%) &goto :deInitEnv)
-
+    if not defined run{run_compressor} if not defined run{run_redundants} if not defined run{run_decompress} if %help{print}%. lss 1. ((call :ahh_helps %help{msg}c%) &goto :deInitEnv)
+    rem make sure we are not doing double the work
+    if defined ext{compact}all set "ext{compact}="
+    rem force/recurse affixation
     if defined bool{recurseDirs}  set "d{s}a=/s"
     if defined bool{forceCompact} set "c{f}a=/f"
-
-    if defined run{CompressExtensions} for %%P in (%path{compact}%) do (
-        if defined ext{compact} for %%E in (%ext{compact}%) do call :CompressExtensions "%%~P\*%%~xE"
-        if defined ext{compact}all call :CompressExtensions "%%~P\%ext{compact}all%"
-        if f%%~aP lss fd call :CompressExtensions %%P
-    )
-
-    if defined run{unCompressExtensions} for %%P in (%path{compact}%) do (
-        if defined ext{compact} for %%E in (%ext{compact}%) do call :unCompressExtensions "%%~P\*%%~xE"
-        if defined ext{compact}all call :unCompressExtensions "%%~P\%ext{compact}all%"
-        if f%%~aP lss fd call :unCompressExtensions %%P
-    )
-
-    if defined run{unCompressRedundant} for %%P in (%path{compact}%) do (
-        if defined ext{compact} for %%E in (%ext{compact}%) do call :unCompressRedundant "%%~P\*%%~xE"
-        if defined ext{compact}all call :unCompressRedundant "%%~P\%ext{compact}all%"
-        if f%%~aP lss fd call :unCompressRedundant %%P
-    )
+    rem run extension lists only on directory paths 
+    if defined run{run_compressor} for %%P in (%path{compact}%) do if f%%~aP gtr fd (
+        if defined ext{compact} for %%E in (%ext{compact}%) do call :run_compressor "%%~P\*%%~xE"
+        if defined ext{compact}all call :run_compressor "%%~P\%ext{compact}all%"
+    ) else call :run_compressor %%P
+    if defined run{run_decompress} for %%P in (%path{compact}%) do if f%%~aP gtr fd (
+        if defined ext{compact} for %%E in (%ext{compact}%) do call :run_decompress "%%~P\*%%~xE"
+        if defined ext{compact}all call :run_decompress "%%~P\%ext{compact}all%"
+    ) else call :run_decompress %%P
+    if defined run{run_redundants} for %%P in (%path{compact}%) do if f%%~aP gtr fd (
+        if defined ext{compact} for %%E in (%ext{compact}%) do call :run_redundants "%%~P\*%%~xE"
+        if defined ext{compact}all call :run_redundants "%%~P\%ext{compact}all%"
+    ) else call :run_redundants %%P
     goto :eof
 
 
-::  Usage  ::   unCompressExtensions  dirPath1\*.*   "dir Path 2\*.extension2"   dirPath3\file3   etc
+::  Usage  ::   run_compressor  dirPath1\*.*   "dir Path 2\*.extension2"   dirPath3\file3   etc
+rem Recursively walks dir tree and tries to compress all the files matching the extension
+rem When matching file is already compressed, does not recompress
+:run_compressor
+    if "%~1" equ "" goto :eof
+    ( for /f "delims=" %%A in ('
+        dir /b /a:-d %d{s}a% %1
+    ') do for /f "skip=6 delims=" %%U in ('
+        %bin{compact}% %c{f}a% /I /Q /C "%%A"
+    ') do call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
+    ) 2>nul
+    shift /1
+    goto %~0
+    goto :eof
+
+
+::  Usage  ::   run_decompress  dirPath1\*.*   "dir Path 2\*.extension2"   dirPath3\file3   etc
 rem Recursively walks dir tree and tries to uncompress all the files matching the extension
 rem When matching file is already compressed, does not re-uncompress
-:unCompressExtensions
+:run_decompress
     if "%~1" equ "" goto :eof
     ( for /f "delims=" %%A in ('
         dir /b /a:-d %d{s}a% %1
@@ -347,10 +339,10 @@ rem When matching file is already compressed, does not re-uncompress
     goto :eof
 
 
-::  Usage  ::   unCompressRedundant  dirPath1\*.*   "dir Path 2\*.extension2"   dirPath3\file3   etc
+::  Usage  ::   run_redundants  dirPath1\*.*   "dir Path 2\*.extension2"   dirPath3\file3   etc
 rem Recursively walks dir tree and tries to uncompress all the files redundant files
 rem Redundant files are files which have a 1.0 ratio
-:unCompressRedundant
+:run_redundants
     if "%~1" equ "" goto :eof
     ( for /f "delims=" %%A in ('
         dir /b /a:-d %d{s}a% %1
@@ -373,17 +365,13 @@ rem  undefined  - notPass, undefined -- [no value, any value not matching pass]
 :validateBoolBi
     if "%~1" equ "" goto :eof
     if not defined %~1 ((shift /1) &goto %~0)
-
     call set "bool{check}=%%%~1%% "
     set "%~1="
-
     if    "%bool{check}:~0,1%" equ "1" set "%~1=true"
     if /i "%bool{check}:~0,1%" equ "p" set "%~1=true"
     if /i "%bool{check}:~0,1%" equ "t" set "%~1=true"
     if /i "%bool{check}:~0,1%" equ "y" set "%~1=true"
-
     set "bool{check}="
-
     shift /1
     goto %~0
 
@@ -397,19 +385,15 @@ rem  undefined  - notPass&notFalse, undefined -- [no value, any value not matchi
 :validateBoolTri
     if "%~1" equ "" goto :eof
     if not defined %~1 ((shift /1) &goto %~0)
-
     call set "bool{check}=%%%~1%% "
     set "%~1="
-
     if    "%bool{check}:~0,1%" equ "1" set "%~1=true"
     if /i "%bool{check}:~0,1%" equ "p" set "%~1=true"
     if /i "%bool{check}:~0,1%" equ "t" set "%~1=true"
     if /i "%bool{check}:~0,1%" equ "y" set "%~1=true"
-
     if    "%bool{check}:~0,1%" equ "0" set "%~1=false"
     if /i "%bool{check}:~0,1%" equ "f" set "%~1=false"
     if /i "%bool{check}:~0,1%" equ "n" set "%~1=false"
-
     set "bool{check}="
     shift /1
     goto %~0
@@ -423,14 +407,10 @@ rem  when providing a path, use only absolutePaths; NO relativePaths. Function d
     if "%~2" equ "" goto :eof
     if "%~1" equ "" goto :eof
     set "%~1="
-
     if "%~p2" equ "" for /f "delims=" %%B in ('
         %SystemRoot%\System32\where.exe %~2
     ') do if not defined %~1 set "%~1=%%B"
-
     if "%~p2" neq "" for /f "delims=" %%B in ('
         %SystemRoot%\System32\where.exe "%~dp2":"%~nx2"
     ') do if not defined %~1 set "%~1=%%B"
-
     goto :eof
-
