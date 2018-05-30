@@ -65,6 +65,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
 - [slength.cmd](./slength.cmd ) -- Uses findstr.exe to calculate length of a string or the length of a variable's value
+  - [slen.cmd](./slen.cmd ) -- minimized version of [slength.cmd](./slength.cmd ) 
   - string example: slength.cmd
   ```
   slength.cmd "this is my super long string"
