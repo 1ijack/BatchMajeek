@@ -459,11 +459,7 @@ rem When matching file is already compressed, does not recompress
             dir /b /a:-d %d{s}a% %1
         ') do for /f "skip=6 delims=" %%U in ('
             %bin{compact}% %c{f}a% /I /Q /C "%%A"
-        ') do (
-            if not defined bool{silent}console call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-            if defined path{log}out ( call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-            ) %path{log}out%
-        )
+        ') do call :lumberLuahg echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
     ) 2>nul
     shift /1
     goto %~0
@@ -479,11 +475,7 @@ rem When matching file is already compressed, does not re-uncompress
             dir /b /a:-d %d{s}a% %1
         ') do for /f "skip=3 delims=" %%U in ('
             %bin{compact}% %c{f}a% /I /Q /U "%%A"
-        ') do (
-            if not defined bool{silent}console call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-            if defined path{log}out ( call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-            ) %path{log}out%
-        )
+        ') do call :lumberLuahg echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
     ) 2>nul
     shift /1
     goto %~0
@@ -507,11 +499,9 @@ rem Redundant files are files which have a 1.0 ratio
             set "f{cb}b="                                    rem file is already not compressed - clear boolean flag
         ) else if  "%%D"   equ   "bytes"                   ( rem action statement clause cannot be empty -- filtering action
         ) else if  "%%D"   equ   "ratio" if defined f{cb}b ( rem clean boolean flag -now check/process ratio vs redun{ratio}min
-            if %%F. geq %redun{ratio}min%. for /f "skip=2 delims=" %%U in ('%bin{compact}% %c{f}a% /I /Q /U "%%A"') do (
-                if not defined bool{silent}console call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-                if defined path{log}out ( call echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
-                ) %path{log}out%
-            )
+            if %%F. geq %redun{ratio}min%. for /f "skip=2 delims=" %%U in ('
+                %bin{compact}% %c{f}a% /I /Q /U "%%A"
+            ') do call :lumberLuahg echo/%~nx0%~0: %%da^te:~-10,6%%%%da^te:~-2%% %%ti^me:~-12,8%%: %%A: %%U
         ) else call set "f{cb}b=true"                        rem looped through entire compaxt response - reset boolean flag
     ) 2>nul
     shift /1
