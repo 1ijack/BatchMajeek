@@ -1,4 +1,4 @@
-::  By JaCk  |  Release 06/03/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/compactor.cmd  |  compactor.cmd  --  uses windows compact.exe to: compact/uncompact specific file extensions, uncompact redundant/zeroRatio files [files which have 0 compression]
+::  Encoded - UTF-8  |  By JaCk  |  Release 06/03/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/compactor.cmd  |  compactor.cmd  --  uses windows compact.exe to: compact/uncompact specific file extensions, uncompact redundant/zeroRatio files [files which have 0 compression]
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -91,12 +91,12 @@ rem    0   -- run with silent and log-output checks
     set /a "help{msg}c+=1"
     if %help{msg}c% gtr 1 goto :eof
     if %help{msg}c% equ 1 (
-        if not defined bool{silent}console call %~0 -1
-        if defined path{log}out (%path{log}out% (call %~0 -1))
+        call :lumberLuahg call %~0 -1
         set "help{msg}c=1"
         goto :eof
     )
     rem help me... pretty please
+    echo/
     echo/  %~nx0:
     echo/       A robust wrapper around compact.exe which compresses/uncompresses files via the filesystem
     echo/
@@ -355,13 +355,16 @@ rem initializes the script environment by defining default states and performing
 
 
 ::  Usage  ::  lumberLuahg  Msg
+::  Usage  ::  lumberLuahg  echo/Msg
+::  Usage  ::  lumberLuahg  call func_Kek  prophó  «Kêkistan»
 rem Log to file and/or print to console
 rem Adds echo statements when needed
+rem can call functions to control output
 :lumberLuahg
     if "%~1" equ "" goto :eof
     if not defined path{log}out if defined bool{silent}console goto :eof
     set "lAp=%~1"
-    if "%lAp:echo=%" equ "%lAp%" ( 
+    if "%lAp:call=%" equ "%lAp%" if "%lAp:echo=%" equ "%lAp%" (
         call %~0 echo/%*
         set "lAp="
         goto :eof
