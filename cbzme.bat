@@ -1,26 +1,18 @@
-:: By JaCk | Release 05/04/2017 | https://pastebin.com/6vEQscEX | cbzme.bat  - Creates cbz files using the 7-zip binary
-::
-:: JK'D Blame-Game Agreement 1.0a, "Finger-Pointer Edition", written by JaCk
-::
-::: No Warranty, No Guarantee, No Support, AS-IS
+:: By JaCk | Release 06/11/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/cbzme.bat  |  https://pastebin.com/6vEQscEX  |  cbzme.bat  - Creates cbz files using the 7-zip binary
 :::
-::: USE AT YOUR OWN RISK
-::: By sheer discretion and without notification, JaCk, retains the all rights, including exemptions, revocation of exemptions of this agreement!
+:::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
+::  Copyright (c) 2018 JaCk
+::  
+::  This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
+::  
+::  Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+::  
+::  1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+::  
+::  2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+::  
+::  3. This notice may not be removed or altered from any source distribution.
 :::
-::: By Running this script or ANY portion of it's, this script's, contents, you agree to the following:
-::: - that you fully understand what these commands, expressions, functions, and/or script(s) or portions of script(s) do
-::: - that you take responsibility for any actions, damages, physical losses, intellectual property losses, and/or losses of ANY kind
-::: - that you DO NOT seek compensation of any kind, monies or otherwise, in ANY FORM, from previous, current and future parties; not limited to:
-:::    -- anyone
-:::    -- everyone
-:::    -- it's author(s)
-:::    -- it's contributor(s)
-:::    -- any beneficiaries
-:::    -- users
-:::    -- distributors
-::
-:::::::::::::::::::::::::::::::::::::::
-
 @echo off & setlocal EnableExtensions EnableDelayedExpansion
 
 :: This script is based on http://alanhorkan.livejournal.com/58404.html
