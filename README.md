@@ -8,13 +8,13 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [compactor.cmd](./compactor.cmd ) -- wrapper around the windows binary compact.exe to compress/uncompress files via the NTFS filesystem
   - Can walk down a directory tree and uncompress all files with a 1.0 ratio
   - Full args parse
-  ```
+````
     compactor -i C:\Windows\Temp\PowerPlan.log -u
     compactor.cmd:unCompressExtensions: 05/28/18 23:28:34: PowerPlan.log: 0 files within 1 directories were uncompressed.
-
+    
     compactor -i C:\Windows\Temp\PowerPlan.log -z
     compactor.cmd:unCompressRedundant: 05/28/18 23:28:47: PowerPlan.log: 0 files within 1 directories were uncompressed.
-
+    
     compactor -i C:\Windows\Temp -r -e .log -c
     compactor.cmd:CompressExtensions: 05/28/18 23:31:13: C:\Windows\Temp\HighPerformancePlan.log: The compression ratio is 1.8 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:14: C:\Windows\Temp\PowerPlan.log: The compression ratio is 1.0 to 1.
@@ -22,7 +22,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
     compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM\vmware-usbarb-2222.log: The compression ratio is 1.2 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-3333.log: The compression ratio is 1.5 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:16: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-4444.log: The compression ratio is 1.1 to 1.
-  ```
+````
 - [duration.cmd](./duration.cmd ) -- calculates execution duration and dumps summary
   - simple calling syntax such as: `duration.cmd timeout /t 5`
   - dumps results/summary as a json object.  Specific data/information is toggled via variables
@@ -36,11 +36,11 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - [elevate/elvc.cmd](./elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
 - [fLines.cmd](./fLines.cmd ) -- prints file line counts using native find.exe
   - simple syntax:
-```
+````
     flines.cmd "%SystemRoot%\DirectX.log" C:\Windows\Logs\CBS\CBS.log
     13967 : C:\Windows\DirectX.log
     6431 : C:\Windows\Logs\CBS\CBS.log
-```
+````
   - runs fairly quick
   - when directory, prints line counts for all the normal files in that directory
 - [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
@@ -66,15 +66,15 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
 - [slength.cmd](./slength.cmd ) -- Uses findstr.exe to calculate length of a string or the length of a variable's value
   - [slen.cmd](./slen.cmd ) -- minimized version of [slength.cmd](./slength.cmd )
-  - [slength.cmd](./slength.cmd ): string and variable examples:
-```
+  - [slength.cmd](./slength.cmd ): string and variable examples:    
+````
     slength.cmd "this is my super long string"
     28
-
+    
     set "abc=0123456789"
     slength.cmd abc
     10
-```
+````
 - [subExport.bat](./subExport.bat ) -- Uses ffmpeg.exe dump/export/save all textbased subtitles from video containers (like .mkv)
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
   - dump/clean ffmpeg subtitle error/export log files
@@ -100,12 +100,13 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [uptime.cmd](./uptime.cmd ) -- returns system uptime
   - depends on wmic for boot and current time
   - quick customized output behavior (based on variables in the `User Config` section)
-```
-uptime.cmd
-217:19:14
-
-uptime.cmd
-9 days 1 hours 19 minutes 14 seconds
-
-
-```
+````
+    uptime.cmd
+    217:19:14
+    
+    uptime.cmd
+    9d 01:19:14
+    
+    uptime.cmd
+    9 days 1 hours 19 minutes 14 seconds    
+````

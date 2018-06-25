@@ -22,10 +22,11 @@
 :::::::::::::::::::::::::::::::::::::::
 
 set "bool{simple}output=true"           rem simplified output
-set "bool{days}output="                 rem output days
-set "bool{hour}output="                 rem output hours
-set "bool{mins}output="                 rem output mins
-set "bool{secs}output="                 rem output secs
+set "bool{year}output="                 rem output years
+set "bool{days}output=true"             rem output days
+set "bool{hour}output=true"             rem output hours
+set "bool{mins}output=true"             rem output mins
+set "bool{secs}output=true"             rem output secs
 
 
 :::::::::::::::::::::::::::::::::::::::
@@ -35,7 +36,7 @@ set "bool{secs}output="                 rem output secs
 :::::::::::::::::::::::::::::::::::::::
 
 rem pre-clear all env vars
-for %%A in (LastBootUpTime;LocalDateTime;m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;uptime{seconds};uptime{minutes};uptime{hours};uptime{days};curr{days};boot{days}) do set "%%A="
+for %%A in (LastBootUpTime;LocalDateTime;m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};curr{days};boot{days}) do set "%%A="
 
 rem check booleans
 call :validateBoolBi bool{simple}output bool{days}output bool{hour}output bool{mins}output bool{secs}output
@@ -43,7 +44,7 @@ call :validateBoolBi bool{simple}output bool{days}output bool{hour}output bool{m
 rem making sure that we have access to the wmic bin
 if not exist "%SystemRoot%\System32\wbem\wmic.exe" (
     echo %~nx0: Error: Fatal: Unable to access: "%SystemRoot%\System32\wbem\wmic.exe"
-    for %%A in (bool{simple}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output) do set "%%A="
+    for %%A in (bool{simple}output;bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output) do set "%%A="
     endlocal
     goto :eof
 )
@@ -77,8 +78,13 @@ rem leapyear check
 if 1%LocalDateTime:~4,2%  gtr 102 set /a "curr{days}+=!( %LocalDateTime:~0,4% %% 4 &  %LocalDateTime:~0,4% %% 100 &  %LocalDateTime:~0,4% %% 400)"
 if 1%LastBootUpTime:~4,2% gtr 102 set /a "boot{days}+=!(%LastBootUpTime:~0,4% %% 4 & %LastBootUpTime:~0,4% %% 100 & %LastBootUpTime:~0,4% %% 400)"
 
+rem year mats -- bit limit 32-1 -- when uptime year is unrealistically higher than 67 years, set to 0
+set /a "uptime{year}=%LocalDateTime:~0,4%-%LastBootUpTime:~0,4%"
+if %uptime{year}% gtr 67 set /a "uptime{year}=0"
+
 rem accumulated totals - convert everything to seconds first, then convert back while adjusting seconds counter
-set /a "uptime{seconds}=((curr{days}-boot{days})*86400)+((1%LocalDateTime:~8,2%-1%LastBootUpTime:~8,2%)*3600)+((1%LocalDateTime:~10,2%-1%LastBootUpTime:~10,2%)*60)+(1%LocalDateTime:~12,2%-1%LastBootUpTime:~12,2%)"
+set /a "uptime{seconds}=(uptime{year}*31536000)+((curr{days}-boot{days})*86400)+((1%LocalDateTime:~8,2%-1%LastBootUpTime:~8,2%)*3600)+((1%LocalDateTime:~10,2%-1%LastBootUpTime:~10,2%)*60)+(1%LocalDateTime:~12,2%-1%LastBootUpTime:~12,2%)"
+if defined bool{year}output set /a "uptime{year}+=uptime{seconds}/31536000,uptime{seconds}-=uptime{year}*31536000"
 if defined bool{days}output set /a "uptime{days}+=uptime{seconds}/86400,uptime{seconds}-=uptime{days}*86400"
 if defined bool{hour}output set /a "uptime{hours}+=uptime{seconds}/3600,uptime{seconds}-=uptime{hours}*3600"
 if defined bool{mins}output set /a "uptime{minutes}+=uptime{seconds}/60,uptime{seconds}-=uptime{minutes}*60"
@@ -93,10 +99,12 @@ if not defined bool{secs}output set "uptime{seconds}="
 rem making sure that all values are populated with at least a 0
 set /a "uptime{days}+=0,uptime{hours}+=0,uptime{minutes}+=0,uptime{seconds}+=0"
 
+rem clearing year var when its zero
+if %uptime{year}% equ 0 set "uptime{year}="
 
 rem when simple report, make sure that needed zeros are prefixed
 if defined bool{simple}output (
-    if %uptime{days}%    lss 10 set "uptime{days}=0%uptime{days}%"
+    REM if %uptime{days}%    lss 10 set "uptime{days}=0%uptime{days}%"
     if %uptime{hours}%   lss 10 set "uptime{hours}=0%uptime{hours}%"
     if %uptime{minutes}% lss 10 set "uptime{minutes}=0%uptime{minutes}%"
     if %uptime{seconds}% lss 10 set "uptime{seconds}=0%uptime{seconds}%"
@@ -104,9 +112,11 @@ if defined bool{simple}output (
 
 rem report uptime and clear
 if defined bool{simple}output (
-    if defined bool{days}output echo/|set /p "enon=%uptime{days}%:"
+    if defined bool{year}output if defined uptime{year} echo/|set /p "enon=%uptime{year}%y "
+    if defined bool{days}output echo/|set /p "enon=%uptime{days}%d "
     echo/%uptime{hours}%:%uptime{minutes}%:%uptime{seconds}%
 ) else (
+    if defined bool{year}output if defined uptime{year} echo/|set /p "enon=%uptime{year}% years "
     if defined bool{days}output echo/|set /p "enon=%uptime{days}% days "
     if defined bool{hour}output echo/|set /p "enon=%uptime{hours}% hours "
     if defined bool{mins}output echo/|set /p "enon=%uptime{minutes}% minutes "
@@ -121,7 +131,7 @@ if defined bool{simple}output (
 :::::::::::::::::::::::::::::::::::::::
 
 rem post-clear all env vars
-for %%A in (bool{simple}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output;LastBootUpTime;LocalDateTime;m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;uptime{seconds};uptime{minutes};uptime{hours};uptime{days};curr{days};boot{days}) do set "%%A="
+for %%A in (bool{simple}output;bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output;LastBootUpTime;LocalDateTime;m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};curr{days};boot{days}) do set "%%A="
 endlocal
 
 
