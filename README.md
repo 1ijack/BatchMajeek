@@ -35,14 +35,14 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - [elevate/elvn.cmd](./elevate/elvn.cmd ) -- self-elevate using "bunction" oneliner; detection via "net session"
   - [elevate/elvc.cmd](./elevate/elvc.cmd ) -- self-elevate using "bunction" oneliner; detection via "calcs"
 - [fLines.cmd](./fLines.cmd ) -- prints file line counts using native find.exe
+  - runs fairly quick
+  - when directory, prints line counts for all the normal files in that directory
   - simple syntax:
 ````
     flines.cmd "%SystemRoot%\DirectX.log" C:\Windows\Logs\CBS\CBS.log
     13967 : C:\Windows\DirectX.log
     6431 : C:\Windows\Logs\CBS\CBS.log
 ````
-  - runs fairly quick
-  - when directory, prints line counts for all the normal files in that directory
 - [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
   - to generate 10 strings: for /l %Z in (1,1,10) do [gstr.cmd](./gstr.cmd )
   - to generate 3 strings, 12, 15, 50 characters: [gstr.cmd](./gstr.cmd ) 12 15 50
