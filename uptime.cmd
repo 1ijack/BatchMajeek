@@ -49,6 +49,15 @@ if not exist "%SystemRoot%\System32\wbem\wmic.exe" (
     goto :eof
 )
 
+rem making sure we have startup/current date-time info
+for %%A in (LastBootUpTime;LocalDateTime) do for /f "tokens=2 delims==-." %%B in ('"%SystemRoot%\System32\wbem\wmic.exe OS get %%A /format:list"') do if not defined %%A set "%%A=%%B"
+for %%A in (LastBootUpTime;LocalDateTime) do if not defined %%A (
+    echo %~nx0: Error: Fatal: dependant variable "%%A" is not defined
+    for %%A in (bool{simple}output;bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output) do set "%%A="
+    endlocal
+    goto :eof
+)
+
 rem making sure that an output type is specified
 if not defined bool{days}output if not defined bool{hour}output if not defined bool{mins}output if not defined bool{secs}output if defined bool{simple}output (
     set "bool{secs}output=true"
@@ -67,14 +76,11 @@ if not defined bool{days}output if not defined bool{hour}output if not defined b
 ::                                   ::
 :::::::::::::::::::::::::::::::::::::::
 
-for /f "tokens=2 delims==-." %%B in ('"%SystemRoot%\System32\wbem\wmic.exe OS get LastBootUpTime /format:list"') do if not defined LastBootUpTime set "LastBootUpTime=%%B"
-for /f "tokens=2 delims==-." %%B in ('"%SystemRoot%\System32\wbem\wmic.exe OS get LocalDateTime  /format:list"') do if not defined LocalDateTime  set "LocalDateTime=%%B"
-
 rem accumulated days by month
 set /a "m01=31,m02=m01+28,m03=m02+31,m04=m03+30,m05=m04+31,m06=m05+30,m07=m06+31,m08=m07+31,m09=m08+30,m10=m09+31,m11=m10+30,m12=m11+31"
 call set /a "curr{days}=m%LocalDateTime:~4,2%+%LocalDateTime:~6,2%,boot{days}=m%LastBootUpTime:~4,2%+%LastBootUpTime:~6,2%"
 
-rem leapyear check
+rem adjust leapyear days
 if 1%LocalDateTime:~4,2%  gtr 102 set /a "curr{days}+=!( %LocalDateTime:~0,4% %% 4 &  %LocalDateTime:~0,4% %% 100 &  %LocalDateTime:~0,4% %% 400)"
 if 1%LastBootUpTime:~4,2% gtr 102 set /a "boot{days}+=!(%LastBootUpTime:~0,4% %% 4 & %LastBootUpTime:~0,4% %% 100 & %LastBootUpTime:~0,4% %% 400)"
 
@@ -97,7 +103,7 @@ if not defined bool{secs}output set "uptime{seconds}="
 :::::::::::::::::::::::::::::::::::::::
 
 rem making sure that all values are populated with at least a 0
-set /a "uptime{days}+=0,uptime{hours}+=0,uptime{minutes}+=0,uptime{seconds}+=0"
+set /a "uptime{year}+=0,uptime{days}+=0,uptime{hours}+=0,uptime{minutes}+=0,uptime{seconds}+=0"
 
 rem clearing year var when its zero
 if %uptime{year}% equ 0 set "uptime{year}="
