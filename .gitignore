@@ -1,0 +1,11 @@
+
+dependencies/wkhtmltox-0.12.4_msvc2015-win64_x64.exe
+dependencies/wkhtmltox-0.12.4_msvc2015-win32_x32.exe
+dependencies/wkhtmltopdf/lib/wkhtmltox.lib
+dependencies/wkhtmltopdf/include/wkhtmltox/pdf.h
+dependencies/wkhtmltopdf/include/wkhtmltox/image.h
+dependencies/wkhtmltopdf/include/wkhtmltox/dllend.inc
+dependencies/wkhtmltopdf/include/wkhtmltox/dllbegin.inc
+dependencies/wkhtmltopdf/bin/wkhtmltopdf.exe
+dependencies/README.md
+dependencies/FindLinks.7z
