@@ -44,5 +44,8 @@ for /l %%A in (1970,1,%date:~-4%) do set /a "utx_leap{total}+=!(%%A %% 4 & %%A %
 for /f "tokens=1-3,4-6 delims=-/" %%A in ("%date:* =%/01/01/1970") do set /a "utx_time{unix}=(((((1%%~A-1%%~D)*305)/10)+%utx_leap{total}%+(1%%~B-1%%~E)+(%%~C-%%~F)*365)*86400)-172800+%utx_utc{shift}%+((1%time:~-5,2%-100)+((1%time:~3,2%-100)*60)+(%time:~0,2%*3600))"
 set "utx_out{bool}=%utx_out_ms%false"
 if /i "%utx_out{bool}:~0,1%" equ "t" set "utx_time{unix}=%utx_time{unix}%%time:~-2%0"
-echo/%utx_time{unix}%
-for %%A in (utx_leap{total};utx_utc{shift};utx_time{unix};utx_out{bool}) do set "%%A="
+if "%~1" equ "" (
+    echo/%utx_time{unix}%
+    for %%A in (utx_leap{total};utx_utc{shift};utx_time{unix};utx_out{bool}) do set "%%A="
+    endlocal
+) else ((set "%~1=%utx_time{unix}%") &(for %%A in (utx_leap{total};utx_utc{shift};utx_time{unix};utx_out{bool}) do set "%%A=") &endlocal)

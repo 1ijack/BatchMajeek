@@ -268,13 +268,28 @@ rem  removing all empty subtitle files
 goto :eof
 
 
+::  Usage  ::  func_sxp_createSubDir   "path"
+:func_sxp_createSubDir
+    if exist "%~1" goto :eof
+
+    echo/|set /p "dummy=%~nx0%~0: Info: "%~1" "
+    md "%~1"
+
+    if not exist "%~1" (
+        echo/Error.
+        echo/
+    ) else echo/Success.
+    if "%~2" neq "" ( ( shift /1 ) & goto %~0 )
+goto :eof
+
+
 ::  Usage  ::  func_sxp_createDir   "path"
 :func_sxp_createDir
     if "%~1" equ "" goto :eof
     if exist "%~1"  goto :eof
 
     echo/|set /p "dummy=%~nx0%~0: Info: %~1 "
-    md "%~1"
+    md %1
 
     if not exist "%~1" (
         echo/Error.
@@ -334,13 +349,14 @@ goto :eof
 :: uses PUSHD to change the current directory
 :: If param is a file, should change directory to the file's directory
 :func_sxp_in_to_dir
-    if "%~1" equ "" goto :eof
-    pushd "%~1"
+    REM if "%*" equ "" goto :eof
+    echo/%*
+    pushd %*
     if "%errorlevel%" neq "0" (
         echo %~nx0%~0: Warning: errorcode [%errorlevel%]
     ) else (
         set /a "sxp_popd_me_back+=1"
-        echo/%~nx0%~0: Info: "%~1"
+        echo/%~nx0%~0: Info: %*
     )
 goto :eof
 
@@ -391,7 +407,7 @@ rem    only dump attachments, fonts/etc, when there are no subs created for that
     ') do for /f "delims=" %%Q in ('cd') do if "%%~Q" neq "%%~dpZsubs" (
         call :func_sxp_cleanLogs  "%%~dpQmeta\"
         call :func_sxp_cleanSubs  "%%~dpQsubs\"
-        call :func_sxp_createDir  "%%~dpZsubs\" "%%~dpZmeta\"
+        call :func_sxp_createSubDir  "subs" "meta"
         call :func_sxp_out_ofDir
         call :func_sxp_in_to_dir  "%%~dpZsubs\"
         call :func_sxp_subDumper  "%%~Z"
