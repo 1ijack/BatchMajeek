@@ -145,8 +145,8 @@ rem  Remove Empty files/directories
 
     pushd "%~1"
     if defined zk_print_script_msgs echo/Info: Checking: "%~1"
-    2>nul call :func_zk_remove_empty_directories   "%~1"
     2>nul call :func_zk_remove_empty_files         "%~1"
+    2>nul call :func_zk_remove_empty_directories   "%~1"
     popd
 
     goto :eof
@@ -159,7 +159,7 @@ rem  Recurse through a directory and remove all empty subdirectories
 
     for /f "tokens=* delims=" %%g in ('dir /b /a:d "%~1\"') do for /f "tokens=1-4 delims= " %%A in ('dir /a "%~1\%%~g"') do if "%%~D" equ "bytes" if "%%~B" equ "File(s)" if %%~A. equ 0. for /f "tokens=1-4 delims= " %%E in ('dir /a "%~1\%%~g"') do if "%%~H" equ "bytes" if "%%~F" equ "Dir(s)" if %%~E. equ 2. (
         set /a "zk_empty_dir_count+=1"
-        if defined zk_print_script_msgs echo/Removing Empty Directory: "%~1\%%~g"
+        if defined zk_print_script_msgs echo/Del: Directory: "%~1\%%~g"
         2>nul 1>nul rmdir /q "%~1\%%~g"
     )
     goto :eof
@@ -172,7 +172,7 @@ rem  Recurse through a directory and remove all empty subdirectories
 
     for /f "tokens=* delims=" %%g in ('dir /b /a:-d "%~1\"') do if %%~zg. equ 0. (
         set /a "zk_empty_file_count+=1"
-        if defined zk_print_script_msgs echo/Removing Empty File: "%~1\%%~g"
+        if defined zk_print_script_msgs echo/Del:  0B  File: "%~1\%%~g"
         2>nul 1>nul del /q "%~1\%%~g"
     )
     goto :eof
