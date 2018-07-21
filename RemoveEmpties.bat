@@ -88,9 +88,8 @@ rem  shift through all the args
     if /i "%#func_zk_arg_shifter{One{a}}:~0,1%" neq "d" set "#func_zk_arg_shifter{One{a}}="
 
     rem  checks accessible/existing directories only;  rem shift early since param is still set to var;  rem  when last args was a path, loop back early
-    if defined #func_zk_arg_shifter{One{a}} if defined zk_recurse_tree (
-        for /f "delims=" %%R in ('dir /b /s /a:d "%~1" ^| sort /r') do call :func_zk_remove_empties   "%%R"
-    ) 2>nul else call :func_zk_remove_empties   %1
+    if defined #func_zk_arg_shifter{One{a}} if defined zk_recurse_tree for /f "delims=" %%R in (' 2^>nul dir /b /s /a:d %1 ^| sort /r') do call :func_zk_remove_empties   "%%R"
+    if defined #func_zk_arg_shifter{One{a}} call :func_zk_remove_empties   %1
     shift /1
     if defined #func_zk_arg_shifter{One{a}} goto :func_zk_arg_shifter
 
