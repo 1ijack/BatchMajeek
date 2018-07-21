@@ -24,9 +24,14 @@
     rem  default path list when called without args; separate with white-spaces, double-quote paths as needed
     set "zk_default_path_list="%temp%""
 
+    rem boolean settings
     rem  set to 'true' if you want script to print: which directory is being checked, which file/subdir is being removed, and post removal summary counts
     rem  when NOT 'true', script is silent; except help dump
     set "zk_print_script_msgs=true"
+
+    rem  set to 'true' when you want to recurse/walk down a path
+    rem  when NOT 'true', script does not recurse
+    set "zk_recurse_tree="
 
 goto :eof
 
@@ -38,15 +43,28 @@ goto :eof
 :func_mein
     call :func_zk_user_script_settings
 
+    rem boolean processing
     set "zk_print_script_msgs=%zk_print_script_msgs%false"
     if /i "%zk_print_script_msgs:~0,1%" neq "t" set "zk_print_script_msgs="
 
+    set "zk_print_script_msgs=%zk_recurse_tree%false"
+    if /i "%zk_recurse_tree:~0,1%" neq "t" set "zk_recurse_tree="
+
+    rem clear/pre-define counters
+    set /a "zk_empty_file_count=0,zk_empty_dir_count=0,zk_param_count=0"
+
     rem  if path is passed into the arglist use that  ::  defaults to %temp% when no args
-    if "%~1%~2%~3" neq "" (
-           goto :func_zk_arg_shifter
-    ) else call :func_zk_arg_shifter   %zk_default_path_list%
+    if "%~1%~2%~3" equ "" ( 
+           call :func_zk_arg_shifter   %zk_default_path_list%
+    ) else call :func_zk_arg_shifter            %*
 
     rem  leave script
+    if not defined zk_print_script_msgs goto :func_zk_zend
+
+    rem print counters
+    echo/Info: Remove Count Summary:
+    echo/   %zk_empty_dir_count% Dir(s)
+    echo/   %zk_empty_file_count% File(s)
     goto :func_zk_zend
 
 goto :eof
@@ -62,15 +80,17 @@ goto :eof
 rem  shift through all the args
 :func_zk_arg_shifter
     set "#func_zk_arg_shifter{One}=%~1"
-    if not defined #func_zk_arg_shifter{One} goto :func_zk_zend
+    if not defined #func_zk_arg_shifter{One} goto :eof
     set /a "zk_param_count+=1"
 
     rem  cannot be empty; sets to white-space when empty
     set "#func_zk_arg_shifter{One{a}}=%~a1 "
     if /i "%#func_zk_arg_shifter{One{a}}:~0,1%" neq "d" set "#func_zk_arg_shifter{One{a}}="
-    
+
     rem  checks accessible/existing directories only;  rem shift early since param is still set to var;  rem  when last args was a path, loop back early
-    if defined #func_zk_arg_shifter{One{a}} call :func_zk_remove_empties   %1
+    if defined #func_zk_arg_shifter{One{a}} if defined zk_recurse_tree (
+        for /f "delims=" %%R in ('dir /b /s /a:d "%~1" ^| sort /r') do call :func_zk_remove_empties   "%%R"
+    ) 2>nul else call :func_zk_remove_empties   %1
     shift /1
     if defined #func_zk_arg_shifter{One{a}} goto :func_zk_arg_shifter
 
@@ -86,6 +106,10 @@ rem  shift through all the args
         rem  Silent arg parsing, when silent is passed in and it's the ONLY arg, use default path list
         if /i "%%~X"  equ "silent" call :func_zk_daFifth    zk_print_script_msgs  %1
         if /i "%%~X"  equ   "s"    call :func_zk_daFifth    zk_print_script_msgs  %1
+
+        rem  recurse dir tree
+        if /i "%%~X"  equ "recurse" set "zk_recurse_tree=true"
+        if /i "%%~X"  equ   "r"     set "zk_recurse_tree=true"
     )
 
 goto :func_zk_arg_shifter
@@ -94,9 +118,9 @@ goto :func_zk_arg_shifter
 ::  Usage  ::  func_zk_dump_help
 rem  Prints Help message to standard out
 :func_zk_dump_help
-    echo/ %~nx0: remove empty files/subdirectories (non-recursive) from specified path(s)
+    echo/ %~nx0: remove empty files/subdirectories from specified path(s)
     echo/
-    echo/ Usage: %~nx0 [ -h^| --help^| /?^| --silent^| -s^| "[path1]"]  "[path2]"  "[path3]"  [etc]
+    echo/ Usage: %~nx0 [ -h^| --help^| /?^| --recurse^| -r^| --silent^| -s^| "[path1]"]  "[path2]"  "[path3]"  [etc]
     echo/
     echo/ Argless Usage, defaults to:
     echo/   %~nx0  %zk_default_path_list%
@@ -120,19 +144,11 @@ rem  Remove Empty files/directories
 :func_zk_remove_empties
     if "%~a1" equ "" goto :eof
 
-    set /a "zk_empty_file_count=0,zk_empty_dir_count=0"
-
     pushd "%~1"
     if defined zk_print_script_msgs echo/Info: Checking: "%~1"
     2>nul call :func_zk_remove_empty_directories   "%~1"
     2>nul call :func_zk_remove_empty_files         "%~1"
     popd
-
-    if not defined zk_print_script_msgs goto :eof
-
-    echo/Info: Remove Count Summary:
-    echo/   %zk_empty_dir_count% Dir(s)
-    echo/   %zk_empty_file_count% File(s)
 
     goto :eof
 
@@ -144,7 +160,7 @@ rem  Recurse through a directory and remove all empty subdirectories
 
     for /f "tokens=* delims=" %%g in ('dir /b /a:d "%~1\"') do for /f "tokens=1-4 delims= " %%A in ('dir /a "%~1\%%~g"') do if "%%~D" equ "bytes" if "%%~B" equ "File(s)" if %%~A. equ 0. for /f "tokens=1-4 delims= " %%E in ('dir /a "%~1\%%~g"') do if "%%~H" equ "bytes" if "%%~F" equ "Dir(s)" if %%~E. equ 2. (
         set /a "zk_empty_dir_count+=1"
-        if defined zk_print_script_msgs echo/Removing Empty Directory: "%%~g"
+        if defined zk_print_script_msgs echo/Removing Empty Directory: "%~1\%%~g"
         2>nul 1>nul rmdir /q "%~1\%%~g"
     )
     goto :eof
@@ -157,7 +173,7 @@ rem  Recurse through a directory and remove all empty subdirectories
 
     for /f "tokens=* delims=" %%g in ('dir /b /a:-d "%~1\"') do if %%~zg. equ 0. (
         set /a "zk_empty_file_count+=1"
-        if defined zk_print_script_msgs echo/Removing Empty File: "%%~g"
+        if defined zk_print_script_msgs echo/Removing Empty File: "%~1\%%~g"
         2>nul 1>nul del /q "%~1\%%~g"
     )
     goto :eof
