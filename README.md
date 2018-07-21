@@ -43,6 +43,13 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
     13967 : C:\Windows\DirectX.log
     6431 : C:\Windows\Logs\CBS\CBS.log
 ````
+- [gmt.cmd](./gmt.cmd ) -- Display the current date and time in GMT (World Time).
+  - queries wmic for time information
+  - This is a simplified/modified version. Original script/code: [ss64.com](https://ss64.com/nt/syntax-gmt.html )
+````
+    gmt.cmd
+    2018-07-21 13:54:07
+````
 - [gstr.cmd](./gstr.cmd ) -- batch native random string genarator.
   - to generate 10 strings: for /l %Z in (1,1,10) do [gstr.cmd](./gstr.cmd )
   - to generate 3 strings, 12, 15, 50 characters: [gstr.cmd](./gstr.cmd ) 12 15 50
@@ -89,6 +96,17 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - My use-case: remove leftover files/dirs from the temp directories
   - determines whether file is empty (by file size)
   - determines whether directory is empty.  This detection is somewhat slow at the moment, I may improve the detection at a later date.
+````
+    removeempties.bat -r "C:\dev\temp"
+    Info: Checking: "C:\dev\temp\tinyMM\templates\TvShowDetailExampleXml"
+    Info: Checking: "C:\dev\temp\tinyMM\templates\SimpleConfluence\include\images"
+    Info: Checking: "C:\dev\temp\tinyMM\templates\SimpleConfluence\include"
+    ...
+    Del: Directory: "C:\dev\temp\nirsoft_logs"
+    Info: Remove Count Summary:
+       15 Dir(s)
+       131 File(s)
+````
 - [unixTime.bat](./unixTime.bat ) -- returns the current system time as unix time (01/01/1970 )
   - Adjusts to system timezone and DST (or any other time adjustments registered with windows)
   - Returns unixTime in Seconds OR milliseconds, option defined in 'user settings' inside the script
