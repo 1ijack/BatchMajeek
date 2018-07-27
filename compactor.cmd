@@ -152,13 +152,13 @@ rem    0   -- run with silent and log-output checks
     echo/  Usage Examples:
     echo/
     echo/      Compacts all uncompacted .log, .txt, .sql, .md files, then rewalk path to uncompact files which ratios are at/less-than 1.5.
-    echo/      %~0 --recurse --force --compact -extensions .log .txt .sql .md --redundant --threshhold 1.5 "%homeDrive%\myWorkspace\logs" --path "%homeDrive%\myWorkspace\ACME_101" --path "%homeDrive%\myWorkspace\database_archive"
+    echo/      %~nx0 --recurse --force --compact -extensions .log .txt .sql .md --redundant --threshhold 1.5 "%homeDrive%\myWorkspace\logs" --path "%homeDrive%\myWorkspace\ACME_101" --path "%homeDrive%\myWorkspace\database_archive"
     echo/
     echo/      Recursively uncompact all files with extensions .7z, .zip, .rar, .cab, .cbr, .cbz
-    echo/      %~0 --recurse --uncompact -extensions .7z .zip .rar .cab .cbr .cbz
+    echo/      %~nx0 --recurse --uncompact -extensions .7z .zip .rar .cab .cbr .cbz
     echo/
     echo/      Compact all files in a directory
-    echo/      %~0 --no-recurse --compact -extensions all --path %homeDrive%\backup\database\
+    echo/      %~nx0 --no-recurse --compact -extensions all --path %homeDrive%\backup\database\
     echo/
     goto :eof
 
