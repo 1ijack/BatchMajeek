@@ -1,7 +1,7 @@
 ::  by JaCk  |  Release 08/023/2018  |  https://github.com/1ijack/BatchMajeek/md5.cmd  |  md5.cmd - compute/[verify(manually)] MD5 hash of a file using PowerShell (or almost any other tool).  (Verify, is not working atm, although I just coded it in another similar script)
 :::
 :: References/Sources/Links -- Thank you very much
-::  Original Author Atif Aziz - Script Name: md5.cmd -- Description: Windows batch script to compute MD5 hash of a file using PowerShell -- srcURL: https://gist.github.com/atifaziz/4368545
+::  Original PowerShell Command Author Atif Aziz - Script Name: md5.cmd -- Description: Windows batch script to compute MD5 hash of a file using PowerShell -- srcURL: https://gist.github.com/atifaziz/4368545
 :::
 ::  WARNING! DO NOT USE if you do not understand what this script's commands do
 ::  No Support, No Warrenties, No Guarentees -- USE WITH YOUR OWN RISK!!!
