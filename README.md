@@ -68,6 +68,9 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 		lazyJson.bat lzj.json
 		myVariable=some kind of string or integer
 
+		set myVar
+		myVariable=some kind of string or integer
+		
 	Usage: lazyJson.bat Summer\atLake\Jason.json  "SomeFile OuttaSpace.json"    fail3.json
 	TL;DR -- NEEDS to have a whitespace on BOTH sides of the colon and each key/value pair needs to be on a separate line
 	    Note: when returnVar is supplied, returns an array of all the json keys from the files

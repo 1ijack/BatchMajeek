@@ -13,7 +13,7 @@
 ::
 ::  3. This notice may not be removed or altered from any source distribution.
 :::
-@echo off &setlocal EnableExtensions
+@echo off
 
 if "%~1" equ "" goto :lazyHelp
 call :lazyArgs %*
