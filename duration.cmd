@@ -1,4 +1,4 @@
-::  by JaCk  |  Release 05/29/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/duration.bat  |  duration.bat  --  displays/calculates execution duration by acting as a wrapper which launches all args in a separate window/memory-space
+::  by JaCk  |  Release 08/11/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/duration.bat  |  duration.bat  --  displays/calculates execution duration by acting as a wrapper which launches all args in a separate window/memory-space
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -25,7 +25,7 @@ rem start subprocess cmdline options
 REM set "dur{startOpts}=start /d "%cd%" /i /min /separate /wait call cmd.exe /c %*"
 REM set "dur{startOpts}=((echo/%*)&call cmd.exe /c %*)"
 REM set "dur{startOpts}=echo/&call cmd.exe /c %*"
-set "dur{startOpts}=call cmd.exe /c %*"
+set "dur{startOpts}=start "" /B /I /SHARED /D "%cd%" /WAIT %comspec% /c"
 
 rem wait # of seconds before leaving script
 rem hardpause   -1
@@ -90,7 +90,7 @@ set /a "dux{offset}+=0,dux{shift}=dux{offset},dux{leap}+=0,dur{waitExit}+=0"
 rem grab start date/time -- run command -- grab end date/time
 set "dur{st}=%time%"
 set "dur{sd}=%date%"
-%dur{startOpts}%
+%dur{startOpts}% %*
 set "dur{et}=%time%"
 set "dur{ed}=%date%"
 
