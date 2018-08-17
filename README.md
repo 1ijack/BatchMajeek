@@ -1,14 +1,31 @@
-# BatchMajeek
-Mysterious Windows Batch/Cmd scripts -- My personal, public exposition.
+# What is BatchMajeek?
+**description**: An expository collection of mysterious, and random Windows Batch/Cmd scripts which insight thought
 
-## Please world, see my junk... No I don't care what you think. (unless you find issues)
+__OR Choose your **own description**:__
+**description**: An `    ` collection of `      ` `Windows bat/cmd scripts` which insight `      `
+
+Some Examples:
+**description**: An `terrible` collection of `crappy, distasteful, obsurd` `Windows bat/cmd scripts` which insight `fearful awe`
+**description**: An `superb` collection of `code-pron` `Windows bat/cmd scripts` which insight `clairvoyant clarity, and a sense of true freedom` 
+
+
+Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[bug](https://github.com/1ijack/BatchMajeek/labels/bug)"
+Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[question](https://github.com/1ijack/BatchMajeek/labels/question)"
+
+## JusDaTip
+	When are quotes required?: [`cmd.exe /?`]
+````batch-file
+		<space>
+		&()[]{}^=;!'+,`~
+````
+## Bat/Cmd Scripts - notes and features
 Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
 - [compactor.cmd](./compactor.cmd ) -- wrapper around the windows binary compact.exe to compress/uncompress files via the NTFS filesystem
   - Can walk down a directory tree and uncompress all files with a 1.0 ratio
   - Full args parse
-````
+````batch-file
     compactor -i C:\Windows\Temp\PowerPlan.log -u
     compactor.cmd:unCompressExtensions: 05/28/18 23:28:34: PowerPlan.log: 0 files within 1 directories were uncompressed.
     
@@ -22,7 +39,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
     compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM\vmware-usbarb-2222.log: The compression ratio is 1.2 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-3333.log: The compression ratio is 1.5 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:16: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-4444.log: The compression ratio is 1.1 to 1.
-````
+````batch-file
 - [duration.cmd](./duration.cmd ) -- calculates execution duration and dumps summary
   - simple calling syntax such as: `duration.cmd timeout /t 5`
   - dumps results/summary as a json object.  Specific data/information is toggled via variables
@@ -38,7 +55,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - runs fairly quick
   - when directory, prints line counts for all the normal files in that directory
   - simple syntax:
-````
+````batch-file
     flines.cmd "%SystemRoot%\DirectX.log" C:\Windows\Logs\CBS\CBS.log
     13967 : C:\Windows\DirectX.log
     6431 : C:\Windows\Logs\CBS\CBS.log
@@ -46,7 +63,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [gmt.cmd](./gmt.cmd ) -- Display the current date and time in GMT (World Time).
   - queries wmic for time information
   - This is a simplified/modified version. Original script/code: [ss64.com](https://ss64.com/nt/syntax-gmt.html )
-````
+````batch-file
     gmt.cmd
     2018-07-21 13:54:07
 ````
@@ -61,7 +78,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [hhmmss.cmd](./hhmmss.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - "Complete Edition"
 - [hhmmss.min.cmd](./hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
 - [lazyJson.bat](./lazyJson.bat) - defines all key/value pairs as envVars
-````
+````batch-file
 	example of a "working" json object: 
 		echo/{ "myVariable" : "some kind of string or integer" }> lzj.json
 		
@@ -79,7 +96,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 		  \n and \r\n are considered end-of-key-value
 		  makes no distinction between an [array] and {key:value} and considers \r\n[array]\r\n as a valueless key
 		  commas outside double-quotes are ignored
-````
+````batch-file
 - [md5.cmd](./md5.cmd ) -- hashes files and directories with optional recursion, unicode and logging options
 - [mvlinks.bat](./mvlinks.bat ) -- Recursively moves directory tree
   - Moves all: files, directories and hardlinks
@@ -94,14 +111,14 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [slength.cmd](./slength.cmd ) -- Uses findstr.exe to calculate length of a string or the length of a variable's value
   - [slen.cmd](./slen.cmd ) -- minimized version of [slength.cmd](./slength.cmd )
   - [slength.cmd](./slength.cmd ): string and variable examples:    
-````
+````batch-file
     slength.cmd "this is my super long string"
     28
     
     set "abc=0123456789"
     slength.cmd abc
     10
-````
+````batch-file
 - [subExport.bat](./subExport.bat ) -- Uses ffmpeg.exe dump/export/save all textbased subtitles from video containers (like .mkv)
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
   - dump/clean ffmpeg subtitle error/export log files
@@ -116,7 +133,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - My use-case: remove leftover files/dirs from the temp directories
   - determines whether file is empty (by file size)
   - determines whether directory is empty.  This detection is somewhat slow at the moment, I may improve the detection at a later date.
-````
+````batch-file
     removeempties.bat -r "C:\dev\temp"
     Info: Checking: "C:\dev\temp\tinyMM\templates\TvShowDetailExampleXml"
     Info: Checking: "C:\dev\temp\tinyMM\templates\SimpleConfluence\include\images"
@@ -138,7 +155,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [uptime.cmd](./uptime.cmd ) -- returns system uptime
   - depends on wmic for boot and current time
   - quick customized output behavior (based on variables in the `User Config` section)
-````
+````batch-file
     uptime.cmd
     217:19:14
     
