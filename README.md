@@ -8,9 +8,9 @@ Some Examples:
 - **description**: An `terrible` collection of `crappy, distasteful, obsurd` `Windows bat/cmd scripts` which insight `fearful awe`    
 - **description**: An `superb` collection of `code-pron` `Windows bat/cmd scripts` which insight `clairvoyant clarity, and a sense of true freedom`     
 
-
-Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[bug](https://github.com/1ijack/BatchMajeek/labels/bug)"
-Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[question](https://github.com/1ijack/BatchMajeek/labels/question)"
+## Can I contact you?
+- Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[bug](https://github.com/1ijack/BatchMajeek/labels/bug)"
+- Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[question](https://github.com/1ijack/BatchMajeek/labels/question)"
 
 ## JusDaTip
 - When are quotes required?: [`cmd.exe /?`]
