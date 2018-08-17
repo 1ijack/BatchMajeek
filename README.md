@@ -132,7 +132,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
     set "abc=0123456789"
     slength.cmd abc
     10
-````batch-file
+````
 - [subExport.bat](./subExport.bat ) -- Uses ffmpeg.exe dump/export/save all textbased subtitles from video containers (like .mkv)
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
   - dump/clean ffmpeg subtitle error/export log files
