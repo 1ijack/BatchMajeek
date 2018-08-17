@@ -99,7 +99,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
         echo/{ "myVariable" : "some kind of string or integer" }> lzj.json
         
         lazyJson.bat lzj.json
-        "myVariable" : "some kind of string or integer"
+        "myVariable=some kind of string or integer"
 
         
     Usage: lazyJson.bat Summer\atLake\Jason.json  "SomeFile OuttaSpace.json"    fail3.json
