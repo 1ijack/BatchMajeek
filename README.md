@@ -4,9 +4,9 @@
 __OR Choose your **own description**:__
 **description**: An `    ` collection of `      ` `Windows bat/cmd scripts` which insight `      `
 
-Some Examples:
-**description**: An `terrible` collection of `crappy, distasteful, obsurd` `Windows bat/cmd scripts` which insight `fearful awe`
-**description**: An `superb` collection of `code-pron` `Windows bat/cmd scripts` which insight `clairvoyant clarity, and a sense of true freedom` 
+Some Examples:    
+- **description**: An `terrible` collection of `crappy, distasteful, obsurd` `Windows bat/cmd scripts` which insight `fearful awe`    
+- **description**: An `superb` collection of `code-pron` `Windows bat/cmd scripts` which insight `clairvoyant clarity, and a sense of true freedom`     
 
 
 Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[bug](https://github.com/1ijack/BatchMajeek/labels/bug)"
