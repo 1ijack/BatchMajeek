@@ -18,6 +18,22 @@ Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) >
 		<space>
 		&()[]{}^=;!'+,`~
 ````
+	What math operations can I do with `set /a "result=math"`
+	for expanded info see: `set /?`.  Here is a summary: [`set/?|findstr/rC:" .[&-]"`]
+````batch-file
+    ()                  - grouping
+    ! ~ -               - unary operators
+    * / %               - arithmetic operators
+    + -                 - arithmetic operators
+    << >>               - logical shift
+    &                   - bitwise and
+    ^                   - bitwise exclusive or
+    |                   - bitwise or
+    = *= /= %= += -=    - assignment
+      &= ^= |= <<= >>=
+    ,                   - expression separator
+````
+
 ## Bat/Cmd Scripts - notes and features
 Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
@@ -39,7 +55,7 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
     compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM\vmware-usbarb-2222.log: The compression ratio is 1.2 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:15: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-3333.log: The compression ratio is 1.5 to 1.
     compactor.cmd:CompressExtensions: 05/28/18 23:31:16: C:\Windows\Temp\vmware-SYSTEM-123456789\vmware-usbarb-4444.log: The compression ratio is 1.1 to 1.
-````batch-file
+````
 - [duration.cmd](./duration.cmd ) -- calculates execution duration and dumps summary
   - simple calling syntax such as: `duration.cmd timeout /t 5`
   - dumps results/summary as a json object.  Specific data/information is toggled via variables
