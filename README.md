@@ -13,13 +13,13 @@ Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) >
 Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[question](https://github.com/1ijack/BatchMajeek/labels/question)"
 
 ## JusDaTip
-    When are quotes required?: [`cmd.exe /?`]
+- When are quotes required?: [`cmd.exe /?`]
 ````batch-file
         <space>
         &()[]{}^=;!'+,`~
 ````
-    What math operations can I do with `set /a "result=math"`
-    for expanded info see: `set /?`.  Here is a summary: [`set/?|findstr/rC:" .[&-]"`]
+- What math operations can I do with `set /a "result=math"`
+  - for expanded info see: `set /?`.  Here is a summary: [`set/?|findstr/rC:" .[&-]"`]
 ````batch-file
     ()                  - grouping
     ! ~ -               - unary operators
