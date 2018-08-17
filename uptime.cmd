@@ -21,13 +21,16 @@
 ::                                   ::
 :::::::::::::::::::::::::::::::::::::::
 
-set "bool{simple}output=true"           rem simplified output
+set "bool{simple}output=true"           rem simplified output [Yy Dd HH:MM:SS].  Not Simplified output [Y years D days HH Hours MM minutes SS seconds] 
+set "bool{plural}output="               rem force plural output when NOT simplified. DO NOT print singular words -- year day hour minute second
+set "bool{padded}output=true"           rem pad single digit values - hours mins secs 
+set "bool{zeroOk}output="               rem Print all toggled results even when they are zero
+
 set "bool{year}output="                 rem output years
 set "bool{days}output=true"             rem output days
 set "bool{hour}output=true"             rem output hours
 set "bool{mins}output=true"             rem output mins
 set "bool{secs}output=true"             rem output secs
-
 
 :::::::::::::::::::::::::::::::::::::::
 ::                                   ::
@@ -35,39 +38,31 @@ set "bool{secs}output=true"             rem output secs
 ::                                   ::
 :::::::::::::::::::::::::::::::::::::::
 
-rem pre-clear all env vars
-for %%A in (LastBootUpTime;LocalDateTime;m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};curr{days};boot{days}) do set "%%A="
+rem pre-clear all env vars and check booleans
+call :validateBoolBi bool{simple}output bool{plural}output bool{padded}output bool{zeroOk}output bool{year}output bool{days}output bool{hour}output bool{mins}output bool{secs}output
+for %%A in (
+    mQty;
+    curr{days};boot{days};
+    LastBootUpTime;LocalDateTime;
+    m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;
+    uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};
+) do set "%%A="
 
-rem check booleans
-call :validateBoolBi bool{simple}output bool{days}output bool{hour}output bool{mins}output bool{secs}output
-
-rem making sure that we have access to the wmic bin
-if not exist "%SystemRoot%\System32\wbem\wmic.exe" (
-    echo %~nx0: Error: Fatal: Unable to access: "%SystemRoot%\System32\wbem\wmic.exe"
-    for %%A in (bool{simple}output;bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output) do set "%%A="
-    endlocal
-    goto :eof
-)
-
-rem making sure we have startup/current date-time info
+rem making sure that we have access to the wmic bin and get startup/current date-time info
+if not exist "%SystemRoot%\System32\wbem\wmic.exe" ((echo %~nx0: Error: Fatal: Unable to access: "%SystemRoot%\System32\wbem\wmic.exe") &goto :deInit)
 for %%A in (LastBootUpTime;LocalDateTime) do for /f "tokens=2 delims==-." %%B in ('"%SystemRoot%\System32\wbem\wmic.exe OS get %%A /format:list"') do if not defined %%A set "%%A=%%B"
-for %%A in (LastBootUpTime;LocalDateTime) do if not defined %%A (
-    echo %~nx0: Error: Fatal: dependant variable "%%A" is not defined
-    for %%A in (bool{simple}output;bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output) do set "%%A="
-    endlocal
-    goto :eof
-)
+for %%A in (LastBootUpTime;LocalDateTime) do if not defined %%A ((echo %~nx0: Error: Fatal: dependant variable "%%A" is not defined) &goto :deInit)
 
-rem making sure that an output type is specified
-if not defined bool{days}output if not defined bool{hour}output if not defined bool{mins}output if not defined bool{secs}output if defined bool{simple}output (
-    set "bool{secs}output=true"
-    set "bool{mins}output=true"
+rem making sure that an output type is specified -- only triggers when all output formats are disabled
+if not defined bool{year}output if not defined bool{days}output if not defined bool{hour}output if not defined bool{mins}output if not defined bool{secs}output if defined bool{simple}output (
     set "bool{hour}output=true"
+    set "bool{mins}output=true"
+    set "bool{secs}output=true"
 ) else (
-    set "bool{secs}output=true"
-    set "bool{mins}output=true"
-    set "bool{hour}output=true"
     set "bool{days}output=true"
+    set "bool{hour}output=true"
+    set "bool{mins}output=true"
+    set "bool{secs}output=true"
 )
 
 :::::::::::::::::::::::::::::::::::::::
@@ -102,31 +97,42 @@ if not defined bool{secs}output set "uptime{seconds}="
 ::                                   ::
 :::::::::::::::::::::::::::::::::::::::
 
-rem making sure that all values are populated with at least a 0
-set /a "uptime{year}+=0,uptime{days}+=0,uptime{hours}+=0,uptime{minutes}+=0,uptime{seconds}+=0"
-
-rem clearing year var when its zero
-if %uptime{year}% equ 0 set "uptime{year}="
+rem to reduce errors - making sure that all values are populated with at least a 0
+set /a "uptime{year}+=0,uptime{days}+=0,uptime{hours}+=0,uptime{minutes}+=0,uptime{seconds}+=0,mQty=0"
 
 rem when simple report, make sure that needed zeros are prefixed
-if defined bool{simple}output (
+if defined bool{padded}output (
+    REM if %uptime{year}%    lss 10 set "uptime{days}=0%uptime{year}%"
     REM if %uptime{days}%    lss 10 set "uptime{days}=0%uptime{days}%"
     if %uptime{hours}%   lss 10 set "uptime{hours}=0%uptime{hours}%"
     if %uptime{minutes}% lss 10 set "uptime{minutes}=0%uptime{minutes}%"
     if %uptime{seconds}% lss 10 set "uptime{seconds}=0%uptime{seconds}%"
 )
 
+rem minimum print threshold adjustment - check zeros bool 
+if defined bool{zeroOk}output set "mQty=.0"
+
 rem report uptime and clear
 if defined bool{simple}output (
-    if defined bool{year}output if defined uptime{year} echo/|set /p "enon=%uptime{year}%y "
-    if defined bool{days}output echo/|set /p "enon=%uptime{days}%d "
+    if defined bool{year}output if %uptime{year}% gtr %mQty% echo/|set /p "enon=%uptime{year}%y "
+    if defined bool{days}output if %uptime{days}% gtr %mQty% echo/|set /p "enon=%uptime{days}%d "
     echo/%uptime{hours}%:%uptime{minutes}%:%uptime{seconds}%
-) else (
-    if defined bool{year}output if defined uptime{year} echo/|set /p "enon=%uptime{year}% years "
-    if defined bool{days}output echo/|set /p "enon=%uptime{days}% days "
-    if defined bool{hour}output echo/|set /p "enon=%uptime{hours}% hours "
-    if defined bool{mins}output echo/|set /p "enon=%uptime{minutes}% minutes "
-    if defined bool{secs}output echo/|set /p "enon=%uptime{seconds}% seconds"
+) 
+if not defined bool{simple}output (
+    if defined bool{plural}output (
+        if defined bool{year}output if   %uptime{year}%  gtr %mQty% echo/|set /p "enon=%uptime{year}% years "
+        if defined bool{days}output if   %uptime{days}%  gtr %mQty% echo/|set /p "enon=%uptime{days}% days "
+        if defined bool{hour}output if  %uptime{hours}%  gtr %mQty% echo/|set /p "enon=%uptime{hours}% hours "
+        if defined bool{mins}output if %uptime{minutes}% gtr %mQty% echo/|set /p "enon=%uptime{minutes}% minutes "
+        if defined bool{secs}output if %uptime{seconds}% gtr %mQty% echo/|set /p "enon=%uptime{seconds}% seconds "
+    )
+    if not defined bool{plural}output (
+        if defined bool{year}output if   %uptime{year}%  equ 1 (echo/|set /p "enon=%uptime{year}% year "     ) else if   %uptime{year}%  gtr %mQty% echo/|set /p "enon=%uptime{year}% years "
+        if defined bool{days}output if   %uptime{days}%  equ 1 (echo/|set /p "enon=%uptime{days}% day "      ) else if   %uptime{days}%  gtr %mQty% echo/|set /p "enon=%uptime{days}% days "
+        if defined bool{hour}output if  %uptime{hours}%  equ 1 (echo/|set /p "enon=%uptime{hours}% hour "    ) else if  %uptime{hours}%  gtr %mQty% echo/|set /p "enon=%uptime{hours}% hours "
+        if defined bool{mins}output if %uptime{minutes}% equ 1 (echo/|set /p "enon=%uptime{minutes}% minute ") else if %uptime{minutes}% gtr %mQty% echo/|set /p "enon=%uptime{minutes}% minutes "
+        if defined bool{secs}output if %uptime{seconds}% equ 1 (echo/|set /p "enon=%uptime{seconds}% second ") else if %uptime{seconds}% gtr %mQty% echo/|set /p "enon=%uptime{seconds}% seconds "
+    )
     echo/
 )
 
@@ -137,16 +143,16 @@ if defined bool{simple}output (
 :::::::::::::::::::::::::::::::::::::::
 
 rem post-clear all env vars
-for %%A in (bool{simple}output;bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output;LastBootUpTime;LocalDateTime;m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};curr{days};boot{days}) do set "%%A="
-endlocal
-
+goto :deInit
+goto :eof
+exit /b
 
 :::::::::::::::::::::::::::::::::::::::
 ::                                   ::
 :::            Functions            :::
 ::                                   ::
 :::::::::::::::::::::::::::::::::::::::
-                              goto :eof
+goto :eof
 
 ::  Usage  ::  validateBoolBi   varName1   varName2   varName3   etc
 rem Checks variable value for these states
@@ -163,3 +169,17 @@ rem  undefined  - notPass, undefined -- [no value, any value not matching pass]
     set "bool{check}="
     shift /1
     goto %~0
+
+::  Usage  ::  deInit
+rem Clears all known script vars, ends local config and proceeds to end-of-file
+:deInit
+    for %%A in (
+        mQty;
+        curr{days};boot{days};
+        LastBootUpTime;LocalDateTime;
+        m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;
+        uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};
+        bool{simple}output;bool{plural}output;bool{padded}output;bool{zeroOk}output;
+		bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output;
+    ) do set "%%A="
+    ((endlocal) &goto:eof)
