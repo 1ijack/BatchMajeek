@@ -13,13 +13,13 @@ Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) >
 Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[question](https://github.com/1ijack/BatchMajeek/labels/question)"
 
 ## JusDaTip
-	When are quotes required?: [`cmd.exe /?`]
+    When are quotes required?: [`cmd.exe /?`]
 ````batch-file
-		<space>
-		&()[]{}^=;!'+,`~
+        <space>
+        &()[]{}^=;!'+,`~
 ````
-	What math operations can I do with `set /a "result=math"`
-	for expanded info see: `set /?`.  Here is a summary: [`set/?|findstr/rC:" .[&-]"`]
+    What math operations can I do with `set /a "result=math"`
+    for expanded info see: `set /?`.  Here is a summary: [`set/?|findstr/rC:" .[&-]"`]
 ````batch-file
     ()                  - grouping
     ! ~ -               - unary operators
@@ -95,14 +95,14 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
 - [hhmmss.min.cmd](./hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
 - [lazyJson.bat](./lazyJson.bat) - Prints all key/value pairs to console
 ````batch-file
-	example of a "working" json object: 
-		echo/{ "myVariable" : "some kind of string or integer" }> lzj.json
-		
-		lazyJson.bat lzj.json
-		"myVariable" : "some kind of string or integer"
+    example of a "working" json object: 
+        echo/{ "myVariable" : "some kind of string or integer" }> lzj.json
+        
+        lazyJson.bat lzj.json
+        "myVariable" : "some kind of string or integer"
 
-		
-	Usage: lazyJson.bat Summer\atLake\Jason.json  "SomeFile OuttaSpace.json"    fail3.json
+        
+    Usage: lazyJson.bat Summer\atLake\Jason.json  "SomeFile OuttaSpace.json"    fail3.json
     Prints all key/value pairs to console
     TL;DR -- NEEDS to have a whitespace on AT LEAST ONE side of the colon.  Each key/value pair needs to be on a separate line
       Note:
