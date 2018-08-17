@@ -1,4 +1,4 @@
-::  By JaCk  |  Release 08/11/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/RemoveEmpties.bat   |  RemoveEmpties.bat --  Remove all empty directories in the temp or specified directory
+::  By JaCk  |  Release 08/11/2018  |  Source  https://github.com/1ijack/BatchMajeek/blob/master/RemoveEmpties.bat   |  RemoveEmpties.bat --  Remove all empty directories in the temp or specified directory
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -107,6 +107,10 @@ rem  shift through all the args
 
     for /f "tokens=* delims=+-/" %%X in ("-%#func_zk_arg_shifter{One}%") do (
         rem  Help arg parsing
+        if /i "%%~X"  equ   "version"      call :func_zk_info
+        if /i "%%~X"  equ      "v"         call :func_zk_info       %%~X
+
+        rem  Help arg parsing
         if /i "%%~X"  equ     "help"       call :func_zk_dump_help
         if /i "%%~X"  equ      "h"         call :func_zk_dump_help
 
@@ -134,6 +138,28 @@ rem  shift through all the args
 
     goto :func_zk_arg_shifter
 
+
+::  Usage  ::  func_zk_info
+rem  Prints Release message to standard out
+rem  Print only Version when %1 is "v"
+:func_zk_info
+    for /f "tokens=1,2,3,4 delims=|" %%L in ('findstr /rc:"^::  [A-Z].*  |" "%~f0"') do if not defined #p{l} (
+        set "#p{l}=true"
+        if /i "%~1" equ "v" (
+            for /f "tokens=1,2*" %%V in ("%%M") do echo/%%V %%W&   rem Version Short 
+        ) else (
+            for /f "tokens=*" %%V in ("%%O") do echo/%%V&          rem Description
+            for /f "tokens=1,2*" %%V in ("%%N") do echo/%%V: %%W&  rem Link
+            for /f "tokens=1,2*" %%V in ("%%M") do echo/%%V: %%W&  rem Version
+            for /f "tokens=2,3*" %%V in ("%%L") do echo/%%V: %%W&  rem Author
+        )
+    )
+    set "#p{l}="
+    set "#p{A}="
+
+    rem  preventing execution of zk_default_path_list
+    set /a "zk_walk_dir_count+=0"
+    goto :eof
 
 ::  Usage  ::  func_zk_dump_help
 rem  Prints Help message to standard out
