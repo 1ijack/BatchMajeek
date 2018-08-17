@@ -1,4 +1,4 @@
-::  By JaCk  |  Release 08/03/2018  |   https://github.com/1ijack/BatchMajeek/blob/master/lazyJson.bat  |  lazyJson.bat  --- too lazy to write this right now.
+::  By JaCk  |  Debug 08/14/2018  |  Source  https://github.com/1ijack/BatchMajeek/blob/master/lazyJson.bat  |  lazyJson.bat  --- lazy json string parser.
 :::
 :::  The zlib/libpng License -- https://opensource.org/licenses/Zlib
 ::  Copyright (c) 2018 JaCk
@@ -13,11 +13,7 @@
 ::
 ::  3. This notice may not be removed or altered from any source distribution.
 :::
-@echo off
-
-if "%~1" equ "" goto :lazyHelp
-call :lazyArgs %*
-goto :eof
+@echo off &goto :lazyMain
 
 :::::::::::::::::::::::::::::::::::::::
 ::                                   ::
@@ -27,15 +23,18 @@ goto :eof
                               goto :eof
 
 rem some lazy crap to tell you how to use this crappy script [copy-pasta from keyVal_json *teehee*]
+:lazyMain
+    if "%~1%~2" equ "" goto :lazyHelp
+    call :lazyArgs %*
+    goto :eof
+
 :lazyHelp
-    (   echo/Usage: %~nx0 Summer\atLake\Jason.json  "SomeFile OuttaSpace.json"    fail3.json
+    (   echo/Usage: %~nx0 Summer\atLake\Jason.json   "SomeFile OuttaSpace.json"   fail3.json
         echo/
-        echo/  defines all key/value pairs as envVars
-        echo/  TL;DR -- NEEDS to have a whitespace on BOTH sides of the colon and each key/value pair needs to be on a separate line
-        echo/    Note: when returnVar is supplied, returns an array of all the json keys from the files
-        echo/    Note: clearing variables -- empty values for non-empty keys are not ignored
-        echo/    lazy json parser -- works -- limitations
-        echo/      spaces between colon and brackets -- { "key" : "value" }
+        echo/  Prints all key/value pairs to console
+        echo/  TL;DR -- NEEDS to have a whitespace on AT LEAST ONE side of the colon.  Each key/value pair needs to be on a separate line
+        echo/    Note:
+        echo/      a space before/after a colon, and brackets -- { "key" : "value" }
         echo/      \n and \r\n are considered end-of-key-value
         echo/      makes no distinction between an [array] and {key:value} and considers \r\n[array]\r\n as a valueless key
         echo/      commas outside double-quotes are ignored
@@ -44,66 +43,48 @@ rem some lazy crap to tell you how to use this crappy script [copy-pasta from ke
 
 rem not my #1 laziest argsParser, but a good third place
 :lazyArgs
+    rem leave when empty or notFile
+    set "t{aB}="
     if "%~1" equ "" goto :eof
-
-    rem Only Accept File/Dir Paths
-    if "%~a1" equ "" (
-        echo/%~nx0%~0: Not sure what you mean and too lazy to find out. Skipping %1
+    set "t{aB}=%~a1 "
+    if "%t{aB}:~0,1%" neq " " (
+        if "%t{aB}:~0,1%" equ "-" call :keyVal_jsonFile "%~1"
         shift /1
         goto %~0
-    )
-
-    rem when dir reloop with file list
-    set "t{aB}=%~a1 "
-    if /i "%t{aB}:~0,1%" equ "d" (
-        for %%A in ("%~2\*") do call %~0 "%%A"
-        goto :eof
-    )
+    ) else call :keyVal_jsonObject %*
     set "t{aB}="
-
-    rem set json key/value pairs to env
-    call :keyVal_json lazyJsonKeys %1
-
-    rem  debug -- prints all the key+value pairs from the json file; pause before continuing
-    REM ((for %%A in (%lazyJsonKeys%) do set %%~A) &pause)
-    for %%A in (%lazyJsonKeys%) do 2>nul set %%~A
-    set "lazyJsonKeys="
-
-    shift /1
-    goto %~0
+    goto :eof
 
 
-::  Usage  ::  keyVal_json  returnVar  "path\to\json\file.json"
-::  Usage  ::  keyVal_json  "path\to\json\file.json"
-rem  defines all key/value pairs as envVars
-rem  TL;DR -- NEEDS to have a whitespace on BOTH sides of the colon and each key/value pair needs to be on a separate line
-rem    Note: when returnVar is supplied, returns an array of all the json keys from the files
-rem    Note: clearing variables -- empty values for non-empty keys are not ignored
-rem    lazy json parser -- works -- limitations
-rem      spaces between colon and brackets -- { "key" : "value" }
+::  Usage  ::  keyVal_jsonFile  "path\to\json\file.json"   "file2.json"
+rem  Prints all key/value pairs to console
+rem  TL;DR -- NEEDS to have a whitespace on AT LEAST ONE side of the colon.  Each key/value pair needs to be on a separate line
+rem    Notes: 
+rem      a space before/after a colon, and brackets -- { "key" : "value" }
 rem      \n and \r\n are considered end-of-key-value
 rem      makes no distinction between an [array] and {key:value} and considers \r\n[array]\r\n as a valueless key
 rem      commas outside double-quotes are ignored
-:keyVal_json
-    if "%~1" equ "" (
-        if "%~2" neq "" call %~0 kv{A}js %2 %3 %4 %5 %6 %7 %8 %9
-        shift /1
-        goto %~0
-    ) else if "%~x1" equ ".json" if not defined lp{A}lk (
-        set "lp{A}lk=true"
-        call %~0 "json{%~n1}" %*
-        set "json{%~n1}="
-        set "lp{A}lk="
-        shift /1
-        goto %~0
-    )
-    if "%~2" equ "" (goto :eof) else if "%~x2" neq ".json" if not exist "%~2" if exist "%~2.json" ((call %~0 %1 "%~2.json") &goto %~0)
-
-    for /f "usebackq tokens=1,* delims=:{}[]" %%A in ("%~2") do for /f "tokens=*" %%C in (%%A) do for /f "tokens=*" %%E in (%%B) do if "%%~C" neq "" set "%%~C=%%~E"
-
-    ( for /f "usebackq tokens=1,* delims=:{}[]" %%A in ("%~2") do for /f "tokens=*" %%C in (%%A) do call set "%~1=%%%~1%%;%%~C"
-    ) 2>nul
-
-    shift /2
-
+:keyVal_jsonFile
+    if "%~1" equ "" goto :eof
+    for /f "usebackq tokens=1,* delims=:{}[]" %%A in ("%~1") do for /f "tokens=*" %%C in ("%%A") do if "%%~C" neq " " if "%%~C" neq "" for /f %%S in ('"(for /f %%T in (%%B) do @echo//) 2>&1"
+    ') do if "%%S" equ "The" (
+        for %%E in (%%B) do echo/"%%~C=%%~E"
+    ) else for /f "tokens=*" %%E in (%%B) do echo/"%%~C=%%~E"
+    shift /1
     goto %~0
+
+::  Usage  ::  keyVal_jsonObject  "key" : "Value"
+::  Usage  ::  keyVal_jsonObject  { "key" : "Value", }
+rem  This function is still super buggy, do not use for live env
+:keyVal_jsonObject
+    if not defined %~n0Debug ((echo/%~nx0%~0: Unstable Fucntion: leaving) &goto :eof)
+    if "%~1" equ "" goto :eof
+    for /f "tokens=1,* delims=:{}[]" %%A in ("%*") do for /f "tokens=1*" %%C in ("%%A") do if "%%~C" neq " " if "%%~C" neq "" for /f %%S in ('"(for /f %%T in (%%B) do @echo//) 2>&1"
+    ') do if "%%S" equ "The" (
+        for %%E in (%%B) do if not defined #fVA (
+            set/a#fVA+=1
+            echo/"%%~C=%%~E"
+        )
+        set "#fVA="
+    ) else for /f "tokens=*" %%E in (%%B) do echo/"%%~C=%%~E"
+    goto :eof

@@ -77,26 +77,24 @@ Most scripts are agnostic to delayedExpansion, should be able to use "!"
   - Support for special characters in URL namespace
 - [hhmmss.cmd](./hhmmss.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - "Complete Edition"
 - [hhmmss.min.cmd](./hhmmss.min.cmd ) -- Converts time: from total-seconds into hh:mm:ss notation - without all the "tard" code
-- [lazyJson.bat](./lazyJson.bat) - defines all key/value pairs as envVars
+- [lazyJson.bat](./lazyJson.bat) - Prints all key/value pairs to console
 ````batch-file
 	example of a "working" json object: 
 		echo/{ "myVariable" : "some kind of string or integer" }> lzj.json
 		
 		lazyJson.bat lzj.json
-		myVariable=some kind of string or integer
+		"myVariable" : "some kind of string or integer"
 
-		set myVar
-		myVariable=some kind of string or integer
 		
 	Usage: lazyJson.bat Summer\atLake\Jason.json  "SomeFile OuttaSpace.json"    fail3.json
-	TL;DR -- NEEDS to have a whitespace on BOTH sides of the colon and each key/value pair needs to be on a separate line
-	    Note: when returnVar is supplied, returns an array of all the json keys from the files
-	    Note: clearing variables -- empty values for non-empty keys are not ignored
-		  Must have whitespaces between colon and brackets -- { "key" : "value" }
-		  \n and \r\n are considered end-of-key-value
-		  makes no distinction between an [array] and {key:value} and considers \r\n[array]\r\n as a valueless key
-		  commas outside double-quotes are ignored
-````batch-file
+    Prints all key/value pairs to console
+    TL;DR -- NEEDS to have a whitespace on AT LEAST ONE side of the colon.  Each key/value pair needs to be on a separate line
+      Note:
+        a space before/after a colon, and brackets -- { "key" : "value" }
+        \n and \r\n are considered end-of-key-value
+        makes no distinction between an [array] and {key:value} and considers \r\n[array]\r\n as a valueless key
+        commas outside double-quotes are ignored
+````
 - [md5.cmd](./md5.cmd ) -- hashes files and directories with optional recursion, unicode and logging options
 - [mvlinks.bat](./mvlinks.bat ) -- Recursively moves directory tree
   - Moves all: files, directories and hardlinks
