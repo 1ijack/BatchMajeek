@@ -180,6 +180,6 @@ rem Clears all known script vars, ends local config and proceeds to end-of-file
         m01;m02;m03;m04;m05;m06;m07;m08;m09;m10;m11;m12;
         uptime{seconds};uptime{minutes};uptime{hours};uptime{days};uptime{year};
         bool{simple}output;bool{plural}output;bool{padded}output;bool{zeroOk}output;
-		bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output;
+        bool{year}output;bool{days}output;bool{hour}output;bool{mins}output;bool{secs}output;
     ) do set "%%A="
     ((endlocal) &goto:eof)
