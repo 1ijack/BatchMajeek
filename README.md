@@ -1,8 +1,8 @@
 # What is BatchMajeek?
 **description**: An expository collection of mysterious, and random Windows Batch/Cmd scripts which insight thought
 
-__OR Choose your **own description**:__
-**description**: An `    ` collection of `      ` `Windows bat/cmd scripts` which insight `      `
+__OR Choose your **own description**:__    
+**description**: An `____` collection of `______` `Windows bat/cmd scripts` which insight `______`
 
 Some Examples:    
 - **description**: An `terrible` collection of `crappy, distasteful, obsurd` `Windows bat/cmd scripts` which insight `fearful awe`    
@@ -35,7 +35,9 @@ Some Examples:
 ````
 
 ## Bat/Cmd Scripts - notes and features
-Most scripts are agnostic to delayedExpansion, should be able to use "!"
+- Underwhelmed/Overwhelmed? [gist nibbles](https://gist.github.com/1ijack) 
+
+__Most scripts are agnostic to delayedExpansion, should be able to use__ `!`    
 - [ah.fu.cmd](./ah.fu.cmd ) -- Grossly overengineered process killer which reads a conf file to change behavior
   - [eph.u.conf](./eph.u.conf ) -- dubbed "process-hitlist" is an example of a conf for [ah.fu.cmd](./ah.fu.cmd )
 - [compactor.cmd](./compactor.cmd ) -- wrapper around the windows binary compact.exe to compress/uncompress files via the NTFS filesystem
