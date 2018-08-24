@@ -121,6 +121,28 @@ __Most scripts are agnostic to delayedExpansion, should be able to use__ `!`
   - For now, requires sysinternals "[findlinks.exe](https://docs.microsoft.com/en-us/sysinternals/downloads/findlinks )" to expose all hardlinks.
   - DOES NOT remove the old tree on purpose
   - DOES NOT move/update junctions or symlinks
+- [pidArray.cmd](./pidArray.cmd ) -- uses `tasklist.exe` to print full/matched processList -- "pid" : "processName.ext"
+  - Simple FIFO ArgsParse 
+    - optionally prefixed keynames: `/?`, `-v`, `\h`, `--help`, `version` 
+    - parameters used as processname filters, see `tasklist`
+````batch-file
+    pidArray cmd*
+    "6168" : "cmd.exe"
+    "4976" : "cmd.exe"
+    
+    pidArray
+    "0" : "System Idle Process"
+    ...
+    "5768" : "tasklist.exe"
+    
+    pidArray|sort
+    "0" : "System Idle Process"
+    ...
+    "996" : "winlogon.exe"
+    
+    pidArray NotRealProcess
+    INFO: No tasks are running which match the specified criteria.
+````
 - [pidme.cmd](./pidme.cmd ) -- Launches command and returns it's PID using powershell
 - [raw2res.bat](./raw2res.bat ) -- Uses ffmpeg.exe to duplicate same images with different base heights
   - depends on [ffmpeg.exe](https://ffmpeg.org/download.html)
