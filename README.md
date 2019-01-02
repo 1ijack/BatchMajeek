@@ -1,16 +1,22 @@
+*01/02/2019 Notice: Due to life, besides a few fixes/updates listed for the scripts below, this repository will not be receiving updates until further notice.*  Note: Repo is available for adoption 
+- [ ] duration.cmd
+- [ ] h2p.cmd
+- [ ] hhmmss.min.cmd
+- [ ] lazyJson.bat
+- [ ] md5.cmd
+- [ ] RemoveEmpties.bat
+- [ ] slen.cmd
+- [ ] etc
+
+
 # What is BatchMajeek?
-**description**: An expository collection of mysterious, and random Windows Batch/Cmd scripts which insight thought
+**description**: An expository collection of mysterious, and random Windows Batch/Cmd scripts
 
-__OR Choose your **own description**:__    
-**description**: An `____` collection of `______` `Windows bat/cmd scripts` which insight `______`
-
-Some Examples:    
-- **description**: An `terrible` collection of `crappy, distasteful, obsurd` `Windows bat/cmd scripts` which insight `fearful awe`    
-- **description**: An `superb` collection of `code-pron` `Windows bat/cmd scripts` which insight `clairvoyant clarity, and a sense of true freedom`     
 
 ## Can I contact you?
 - Having Problems? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[bug](https://github.com/1ijack/BatchMajeek/labels/bug)"
 - Send me message? [new issue](https://github.com/1ijack/BatchMajeek/issues/new) > Labels > "[question](https://github.com/1ijack/BatchMajeek/labels/question)"
+
 
 ## JusDaTip
 - When are quotes required?: [`cmd.exe /?`]
