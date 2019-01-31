@@ -1,4 +1,4 @@
-:: By JaCk  |  Release 06/23/2018  |  https://github.com/1ijack/BatchMajeek/blob/master/7z.association.fix.bat  | 7z.association.fix.bat  --  add/fix 7z file association commands
+:: By JaCk  |  Release 01/30/2019  |  https://github.com/1ijack/BatchMajeek/blob/master/7z.association.fix.bat  | 7z.association.fix.bat  --  add/fix 7z file association commands
 :: Note: due to the use of the 'assoc' command -- this script/commands need to be run with elevated (administrator) privileges -- script does NOT self elevate
 ::  
 :::
@@ -18,7 +18,7 @@
 :::
 :: 
 :: @rem  Batch file: one-liner for adding extension associations which are not already assigned
-::     @echo off & setlocal DisableDelayedExpansion EnableExtensions & @(if not exist "%ProgramFiles(x86)%\7-Zip\7zFM.exe" if not exist "%ProgramFiles%\7-Zip\7zFM.exe" @( ( echo/Error: Fatal: Missing 7z binaries, nothing to do.) & goto :eof ) 1>&2 else @(for %%A in ( .001 .002 .003 .004 .005 .006 .007 .008 .009 .010 .7z .a .apm .ar .arj .bz2 .bzip2 .cab .chi .chm .chq .chw .cpio .cramfs .deb .dmg .epub .esd .ext2 .ext3 .ext4 .ext .fat .gz .gzip .hfs .hfsx .hxi .hxq .hxr .hxs .hxw .ihex .img .iso .jar .lha .lib .lit .lzh .lzma .mbr .mslz .mub .nsis .ntfs .ods .odt .pkg .ppmd .qcow2 .qcow2c .qcow .r00 .r01 .r02 .r03 .r04 .r05 .r06 .r07 .r08 .r09 .r10 .r11 .r12 .r13 .r14 .r15 .r16 .r17 .r18 .r19 .r20 .r21 .r22 .r23 .r24 .r25 .r26 .r27 .r28 .r29 .rar .rpm .scap .squashfs .swm .tar .taz .tbz2 .tbz .tgz .txz .udf .uefif .vdi .vhd .vmdk .wim .xar .xpi .xz .z .zip .zipx ) do @(( assoc %%A ) 2>nul 1>nul || assoc %%A=7z)) & @((( ftype ) | findstr /i "7zFM" ) 2>nul 1>nul || ftype 7z="%ProgramFiles%\7-Zip\7zFM.exe" %1 %*)) & 1>nul @(endlocal & goto :eof || exit /b) 2>nul
+::     @echo off & setlocal DisableDelayedExpansion EnableExtensions & @(if not exist "%ProgramFiles(x86)%\7-Zip\7zFM.exe" if not exist "%ProgramFiles%\7-Zip\7zFM.exe" @( ( echo/Error: Fatal: Missing 7z binaries, nothing to do.) & goto :eof ) 1>&2 else @(for %%A in ( .001 .002 .003 .004 .005 .006 .007 .008 .009 .010 .7z .a .apm .ar .arj .bz2 .bzip2 .cab .chi .chm .chq .chw .cpio .cramfs .deb .dmg .epub .esd .ext2 .ext3 .ext4 .ext .fat .gz .gzip .hfs .hfsx .hxi .hxq .hxr .hxs .hxw .ihex .img .iso .jar .lha .lib .lit .lzh .lzma .mbr .mslz .mub .nsis .ntfs .ods .odt .pkg .ppmd .qcow2 .qcow2c .qcow .r00 .r01 .r02 .r03 .r04 .r05 .r06 .r07 .r08 .r09 .r10 .r11 .r12 .r13 .r14 .r15 .r16 .r17 .r18 .r19 .r20 .r21 .r22 .r23 .r24 .r25 .r26 .r27 .r28 .r29 .rar .rpm .scap .squashfs .swm .tar .taz .tbz2 .tbz .tgz .txz .udf .uefif .vdi .vhd .vmdk .wim .xar .xpi .xz .z .zip .zipx ) do @(( assoc %%A ) 2>nul 1>nul || assoc %%A=7z)) & @((( ftype ) | findstr /i "7zFM" ) 2>nul 1>nul || ftype 7z="%ProgramFiles%\7-Zip\7zFM.exe" %%^1 %%^*)) & 1>nul @(endlocal & goto :eof || exit /b) 2>nul
 :: 
 :: @rem  if/when this batch file fails to run remove this line and the next two lines, save, and try again
 :: @rem  Interactive command line console: one-liner for adding extension associations which are not already assigned
@@ -27,14 +27,26 @@
 :: 
 :::
 @rem  Batch AND/OR Interactive Console: forcing/overwriting/adding extension associations
-    @if exist "%ProgramFiles(x86)%\7-Zip\7zFM.exe" @(
-        ftype 7z="%ProgramFiles(x86)%\7-Zip\7zFM.exe" %1 %*
-    ) else @if exist "%ProgramFiles%\7-Zip\7zFM.exe" @(
-        ftype 7z="%ProgramFiles%\7-Zip\7zFM.exe" %1 %*
+    @if "%~nx0" equ "%~n0%~x0" @(
+        if exist "%ProgramFiles(x86)%\7-Zip\7zFM.exe" @(
+            ftype 7z="%ProgramFiles(x86)%\7-Zip\7zFM.exe" %%^1 %%^*
+        ) else @if exist "%ProgramFiles%\7-Zip\7zFM.exe" @(
+            ftype 7z="%ProgramFiles%\7-Zip\7zFM.exe" %%^1 %%^*
+        ) else @(
+            echo/Error: Fatal: Missing 7z binaries, nothing to do.
+            goto :eof
+        ) 1>&2
     ) else @(
-        echo/Error: Fatal: Missing 7z binaries, nothing to do.
-        goto :eof
-    ) 1>&2
+        if exist "%ProgramFiles(x86)%\7-Zip\7zFM.exe" @(
+            ftype 7z="%ProgramFiles(x86)%\7-Zip\7zFM.exe" %1 %*
+        ) else @if exist "%ProgramFiles%\7-Zip\7zFM.exe" @(
+            ftype 7z="%ProgramFiles%\7-Zip\7zFM.exe" %1 %*
+        ) else @(
+            echo/Error: Fatal: Missing 7z binaries, nothing to do.
+            goto :eof
+        ) 1>&2
+    )
+
 
     @assoc .001=7z
     @assoc .002=7z
@@ -152,3 +164,4 @@
     @assoc .z=7z
     @assoc .zip=7z
     @assoc .zipx=7z
+	@if "%errorlevel%" neq  "0" @if "%~nx0" equ "%~n0%~x0" @echo/&@echo/Error: script completed with errors&timeout /t 30
